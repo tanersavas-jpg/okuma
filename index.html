@@ -280,9 +280,14 @@ body{
 .test-butonlar .btn{flex:1}
 
 /* ===================== YAPIŞTIR ===================== */
-.yapistir-yardim{font-size:14px; color:var(--metin-2); line-height:1.5; margin:8px 2px 12px}
-.yapistir-yardim code{background:var(--kagit-2); padding:1px 6px; border-radius:5px; font-size:13px}
-#yapistirAlan{width:100%; min-height:50vh; resize:vertical; border:1px solid var(--cizgi);
+.yapistir-adim{background:var(--kagit-2); border:1px solid var(--cizgi); border-radius:14px;
+  padding:16px; margin:8px 2px 14px; font-size:15px; line-height:1.9}
+.yapistir-adim b{color:var(--yesil-koyu)}
+:root[data-tema="koyu"] .yapistir-adim b{color:var(--yesil)}
+.yapistir-adim small{display:block; margin-top:8px; color:var(--metin-2); font-size:13px}
+.yapistir-adim code{background:var(--kagit); padding:1px 6px; border-radius:5px; font-size:13px}
+#panodanBtn{margin-bottom:12px}
+#yapistirAlan{width:100%; min-height:38vh; resize:vertical; border:1px solid var(--cizgi);
   border-radius:14px; padding:16px; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:14px;
   background:var(--kagit-2); color:var(--metin); line-height:1.5}
 .yapistir-butonlar{display:flex; gap:12px; margin-top:14px}
@@ -329,8 +334,8 @@ body{
   </div>
   <div id="kartListe"></div>
   <div class="ekle-cubuk">
-    <button class="btn tam" id="yapistirBtn">📋 Hikâye yapıştır (AI metni)</button>
-    <button class="btn ikincil tam" id="ekleBtn" style="margin-top:10px">＋ .json dosyası yükle</button>
+    <button class="btn tam" id="yapistirBtn">＋ AI'dan hikâye ekle</button>
+    <button class="btn ikincil tam" id="ekleBtn" style="margin-top:10px">.json dosyasından ekle</button>
   </div>
 </main>
 
@@ -367,12 +372,18 @@ body{
 
 <!-- ============ YAPIŞTIR EKRANI ============ -->
 <main class="ekran gizli" id="ekranYapistir">
-  <p class="yapistir-yardim">Yapay zekânın verdiği hikâye metnini buraya yapıştır ve <b>Ekle</b>’ye bas.
-     (Baştaki/sondaki fazla yazı ve <code>```json</code> çiti otomatik temizlenir.)</p>
-  <textarea id="yapistirAlan" placeholder='{ "story_id": "...", "title": "...", "pages": [ ... ] }'></textarea>
+  <div class="yapistir-adim">
+    <b>Nasıl eklenir?</b>
+    <div>① Yapay zekânın verdiği hikâye <b>metnini kopyala</b> (PDF değil, metin).</div>
+    <div>② <b>📋 Panodan yapıştır</b>’a bas (ya da kutuya uzun bas → Yapıştır).</div>
+    <div>③ <b>Ekle</b>’ye bas — biter.</div>
+    <small>Fazla yazı ve <code>```json</code> çiti otomatik temizlenir.</small>
+  </div>
+  <button class="btn tam" id="panodanBtn">📋 Panodan yapıştır</button>
+  <textarea id="yapistirAlan" placeholder="Hikâye metnini (JSON) buraya yapıştır…"></textarea>
   <div class="yapistir-butonlar">
     <button class="btn ikincil" id="yapistirIptal">İptal</button>
-    <button class="btn" id="yapistirEkle">Ekle</button>
+    <button class="btn" id="yapistirEkle">✓ Ekle</button>
   </div>
 </main>
 
@@ -1295,6 +1306,13 @@ function olaylariBagla(){
     ekranGoster("Yapistir","Hikâye yapıştır");
   });
   $("#yapistirIptal").addEventListener("click", () => { ekranGoster("Kutuphane","Okuma"); kutuphaneCiz(); });
+  $("#panodanBtn").addEventListener("click", async () => {
+    try{
+      const t = await navigator.clipboard.readText();
+      if (t && t.trim()){ $("#yapistirAlan").value = t; toast("Yapıştırıldı — şimdi ✓ Ekle’ye bas"); }
+      else toast("Pano boş — önce metni kopyala");
+    }catch(e){ toast("Panoya erişilemedi — kutuya uzun basıp Yapıştır de"); }
+  });
   $("#yapistirEkle").addEventListener("click", () => {
     const m = $("#yapistirAlan").value.trim();
     if (!m){ toast("Önce metni yapıştır"); return; }
