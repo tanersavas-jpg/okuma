@@ -279,6 +279,15 @@ body{
 .test-butonlar{display:flex; gap:12px; margin-top:16px}
 .test-butonlar .btn{flex:1}
 
+/* ===================== YAPIŞTIR ===================== */
+.yapistir-yardim{font-size:14px; color:var(--metin-2); line-height:1.5; margin:8px 2px 12px}
+.yapistir-yardim code{background:var(--kagit-2); padding:1px 6px; border-radius:5px; font-size:13px}
+#yapistirAlan{width:100%; min-height:50vh; resize:vertical; border:1px solid var(--cizgi);
+  border-radius:14px; padding:16px; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:14px;
+  background:var(--kagit-2); color:var(--metin); line-height:1.5}
+.yapistir-butonlar{display:flex; gap:12px; margin-top:14px}
+.yapistir-butonlar .btn{flex:1}
+
 /* ===================== AYARLAR ===================== */
 .ayar-grup{background:var(--kagit-2); border:1px solid var(--cizgi);
   border-radius:16px; padding:6px 16px; margin-bottom:16px}
@@ -320,7 +329,8 @@ body{
   </div>
   <div id="kartListe"></div>
   <div class="ekle-cubuk">
-    <button class="btn tam" id="ekleBtn">＋ Hikâye ekle (.json)</button>
+    <button class="btn tam" id="yapistirBtn">📋 Hikâye yapıştır (AI metni)</button>
+    <button class="btn ikincil tam" id="ekleBtn" style="margin-top:10px">＋ .json dosyası yükle</button>
   </div>
 </main>
 
@@ -353,6 +363,17 @@ body{
 <!-- ============ TEST EKRANI (Adım 3) ============ -->
 <main class="ekran gizli" id="ekranTest">
   <p style="color:var(--metin-2)">Test ekranı Adım 3'te gelecek.</p>
+</main>
+
+<!-- ============ YAPIŞTIR EKRANI ============ -->
+<main class="ekran gizli" id="ekranYapistir">
+  <p class="yapistir-yardim">Yapay zekânın verdiği hikâye metnini buraya yapıştır ve <b>Ekle</b>’ye bas.
+     (Baştaki/sondaki fazla yazı ve <code>```json</code> çiti otomatik temizlenir.)</p>
+  <textarea id="yapistirAlan" placeholder='{ "story_id": "...", "title": "...", "pages": [ ... ] }'></textarea>
+  <div class="yapistir-butonlar">
+    <button class="btn ikincil" id="yapistirIptal">İptal</button>
+    <button class="btn" id="yapistirEkle">Ekle</button>
+  </div>
 </main>
 
 <!-- ============ KELİMELERİM EKRANI ============ -->
@@ -554,7 +575,7 @@ function fontUygula(){
 /* =====================================================================
    3) YÖNLENDİRME (basit ekran değiştirme)
    ===================================================================== */
-const EKRANLAR = ["Kutuphane","Okuyucu","Test","Kelimeler","Istatistik","Ayarlar"];
+const EKRANLAR = ["Kutuphane","Okuyucu","Test","Yapistir","Kelimeler","Istatistik","Ayarlar"];
 let aktifEkran = "Kutuphane";
 let oncekiEkran = "Kutuphane";
 
@@ -989,22 +1010,47 @@ async function testSonuc(){
   $("#testBitir").addEventListener("click", () => { ekranGoster("Kutuphane","Okuma"); kutuphaneCiz(); });
 }
 
-/* ---- Hikâye ekleme (.json yükle) ---- */
+/* ---- Hikâye ekleme: ortak kaydetme ---- */
+async function hikayeKaydet(veri){
+  if (!veri || !veri.story_id || !Array.isArray(veri.pages))
+    throw new Error("Geçersiz hikâye (story_id ve pages gerekli).");
+  const varMi = await DB.getir("stories", veri.story_id);
+  await DB.koy("stories", veri);
+  if (!varMi) await DB.koy("progress", bosIlerleme(veri.story_id));
+  return varMi;
+}
+
+// AI çıktısındaki ```json ... ``` çitini ve fazlalığı temizle → JSON metni
+function jsonAyikla(metin){
+  let t = (metin||"").trim();
+  t = t.replace(/^```(?:json)?/i, "").replace(/```$/,"").trim();
+  // ilk { veya [ ile son } veya ] arasını al (baştaki/sondaki açıklama metnini kırp)
+  const b = Math.min(...[t.indexOf("{"), t.indexOf("[")].filter(i=>i>=0));
+  const s = Math.max(t.lastIndexOf("}"), t.lastIndexOf("]"));
+  if (isFinite(b) && s>b) t = t.slice(b, s+1);
+  return t;
+}
+
+// Dosyadan (.json) yükle
 async function hikayeYukle(dosya){
   try{
-    const metin = await dosya.text();
-    const veri = JSON.parse(metin);
-    // Doğrulama
-    if (!veri.story_id || !Array.isArray(veri.pages))
-      throw new Error("Geçersiz hikâye: story_id ve pages gerekli.");
-    const varMi = await DB.getir("stories", veri.story_id);
-    await DB.koy("stories", veri);
-    if (!varMi) await DB.koy("progress", bosIlerleme(veri.story_id));
-    toast(varMi ? "Hikâye güncellendi" : "Hikâye eklendi ✓");
+    const veri = JSON.parse(await dosya.text());
+    const kayitlar = Array.isArray(veri) ? veri : [veri];
+    let n=0; for (const h of kayitlar){ await hikayeKaydet(h); n++; }
+    toast(n>1 ? (n+" hikâye eklendi ✓") : "Hikâye eklendi ✓");
     kutuphaneCiz();
-  }catch(err){
-    toast("Yükleme hatası: " + err.message);
-  }
+  }catch(err){ toast("Yükleme hatası: " + err.message); }
+}
+
+// Yapıştırılan metinden yükle (AI çıktısı)
+async function metindenYukle(metin){
+  try{
+    const veri = JSON.parse(jsonAyikla(metin));
+    const kayitlar = Array.isArray(veri) ? veri : [veri];
+    let n=0; for (const h of kayitlar){ await hikayeKaydet(h); n++; }
+    toast(n>1 ? (n+" hikâye eklendi ✓") : "Hikâye eklendi ✓");
+    ekranGoster("Kutuphane","Okuma"); kutuphaneCiz();
+  }catch(err){ toast("Metin hatası: " + err.message); }
 }
 
 /* =====================================================================
@@ -1241,6 +1287,18 @@ function olaylariBagla(){
   $("#dosyaGiris").addEventListener("change", (e) => {
     if (e.target.files[0]) hikayeYukle(e.target.files[0]);
     e.target.value = "";
+  });
+
+  // Yapıştır (AI metni)
+  $("#yapistirBtn").addEventListener("click", () => {
+    $("#yapistirAlan").value = "";
+    ekranGoster("Yapistir","Hikâye yapıştır");
+  });
+  $("#yapistirIptal").addEventListener("click", () => { ekranGoster("Kutuphane","Okuma"); kutuphaneCiz(); });
+  $("#yapistirEkle").addEventListener("click", () => {
+    const m = $("#yapistirAlan").value.trim();
+    if (!m){ toast("Önce metni yapıştır"); return; }
+    metindenYukle(m);
   });
 
   $("#ayarBtn").addEventListener("click", () => ekranGoster("Ayarlar","Ayarlar"));

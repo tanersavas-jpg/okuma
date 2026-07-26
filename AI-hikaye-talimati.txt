@@ -1,0 +1,51 @@
+════════════════════════════════════════════════════════════════
+  OKUMA UYGULAMASI — YAPAY ZEKÂ HİKÂYE ÜRETME TALİMATI
+  (Bu metni ChatGPT/Claude/Gemini'ye yapıştır. Üstteki köşeli
+   parantezleri kendi isteğine göre değiştir. Çıkan metni kopyala,
+   uygulamada "📋 Hikâye yapıştır" ile yapıştır.)
+════════════════════════════════════════════════════════════════
+
+Türkçe anadili olan, [DİL: İtalyanca] öğrenen bir yetişkin için A2
+seviyesinde bir okuma hikâyesi yaz. Konu: [KONU: örn. bir kedi ve fare].
+Uzunluk: [KAÇ SAYFA: örn. 3] sayfa.
+
+Bana SADECE aşağıdaki yapıda geçerli bir JSON ver. Başka açıklama,
+selamlama ya da metin yazma. Kurallar:
+
+- "language": İtalyanca için "it", İngilizce için "en" yaz.
+- "vocab" içindeki kelime anahtarı DİL KODUYLA AYNI olmalı:
+  İtalyanca ise "it", İngilizce ise "en". (Örnek: {"it":"gatto","tr":"kedi"})
+- "tr": her kelimenin ve gerekiyorsa notun TÜRKÇE karşılığı.
+- Her sayfada 4–8 kısa, A2 seviyesinde cümle ("sentences").
+- "vocab": o sayfadaki ZOR/yeni kelimeler + Türkçe anlamı (5–10 kelime).
+- "quiz": hikâyenin sonunda 3–5 çoktan seçmeli soru; sorular ve
+  şıklar öğrenilen dilde. "answer" = doğru şıkkın SIRA NUMARASI,
+  0'dan başlar (ilk şık 0, ikinci 1, üçüncü 2...).
+- "story_id": küçük harf, boşluksuz, benzersiz bir kısa ad
+  (örn. "gatto_topo_01").
+- "level": "A1-A2". "image_hint": sayfayı özetleyen 1–3 kelime.
+
+ŞEMA:
+{
+  "story_id": "kisa_ad_01",
+  "title": "Hikâye Başlığı",
+  "level": "A1-A2",
+  "language": "it",
+  "pages": [
+    {
+      "page": 1,
+      "chapter": "Capitolo 1 — ...",
+      "image_hint": "...",
+      "sentences": ["Cümle bir.", "Cümle iki."],
+      "vocab": [
+        {"it": "kelime", "tr": "türkçesi", "note": ""}
+      ]
+    }
+  ],
+  "quiz": [
+    {"q": "Soru?", "options": ["Şık A", "Şık B", "Şık C"], "answer": 0}
+  ]
+}
+
+Şimdi bu şemaya uygun, [KONU] hakkındaki hikâyenin JSON'unu üret.
+════════════════════════════════════════════════════════════════
