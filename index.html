@@ -61,8 +61,11 @@ body{
 }
 .ustcubuk h1{font-size:19px; margin:0; font-weight:600; flex:1;
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-.ustcubuk .geri{font-size:24px; background:none; border:none; color:#fff;
-  padding:4px 6px; cursor:pointer; line-height:1}
+.ustcubuk .geri{font-size:16px; font-weight:600; background:rgba(255,255,255,.18);
+  border:1px solid rgba(255,255,255,.35); color:#fff; border-radius:10px;
+  padding:8px 14px 8px 10px; cursor:pointer; line-height:1; white-space:nowrap;
+  display:flex; align-items:center; gap:3px}
+.ustcubuk .geri:active{background:rgba(255,255,255,.30)}
 .ustcubuk .arac{font-size:22px; background:none; border:none; color:#fff;
   padding:6px 8px; cursor:pointer; line-height:1}
 
@@ -318,7 +321,7 @@ body{
 
 <!-- ============ ÜST ÇUBUK ============ -->
 <header class="ustcubuk">
-  <button class="geri gizli" id="geriBtn" aria-label="Geri">‹</button>
+  <button class="geri gizli" id="geriBtn" aria-label="Geri">‹ Geri</button>
   <h1 id="baslik">Okuma</h1>
   <button class="arac" id="ayarBtn" aria-label="Ayarlar">⚙︎</button>
 </header>
@@ -1389,10 +1392,20 @@ function baslat(){
 }
 document.addEventListener("DOMContentLoaded", baslat);
 
-// Service Worker — çevrimdışı çalışma (https / localhost gerekir; file:// atlanır)
+// Service Worker — çevrimdışı çalışma + otomatik güncelleme
+// (https / localhost gerekir; file:// atlanır)
 if ("serviceWorker" in navigator){
+  const ilkKontrolcuVardi = !!navigator.serviceWorker.controller;
+  let yenilendi = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (yenilendi || !ilkKontrolcuVardi) return; // ilk kurulumda değil, yalnızca güncellemede
+    yenilendi = true;
+    location.reload();                            // yeni sürüme sessizce geç
+  });
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("sw.js").catch(()=>{ /* file:// veya destek yok — sorun değil */ });
+    navigator.serviceWorker.register("sw.js").then(reg => {
+      setInterval(() => reg.update(), 60*60*1000); // saatte bir güncelleme kontrolü
+    }).catch(()=>{ /* file:// veya destek yok — sorun değil */ });
   });
 }
 </script>
