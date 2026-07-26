@@ -1,0 +1,50 @@
+{
+  "story_id": "tortoise_hare_01",
+  "title": "The Tortoise and the Hare",
+  "level": "A1-A2",
+  "language": "en",
+  "pages": [
+    {
+      "page": 1,
+      "chapter": "Part 1 — The Boast",
+      "image_hint": "A fast hare laughing at a slow tortoise",
+      "sentences": [
+        "Once upon a time there was a very fast hare.",
+        "The hare liked to run and always won every race.",
+        "One day he saw a slow tortoise walking on the road.",
+        "«You are so slow!» laughed the hare."
+      ],
+      "vocab": [
+        {"en": "hare", "tr": "tavşan", "note": ""},
+        {"en": "tortoise", "tr": "kaplumbağa", "note": ""},
+        {"en": "fast", "tr": "hızlı", "note": ""},
+        {"en": "slow", "tr": "yavaş", "note": ""},
+        {"en": "race", "tr": "yarış", "note": ""},
+        {"en": "laughed", "tr": "güldü", "note": "to laugh = gülmek"}
+      ]
+    },
+    {
+      "page": 2,
+      "chapter": "Part 2 — The Race",
+      "image_hint": "The tortoise crossing the finish line while the hare sleeps",
+      "sentences": [
+        "The tortoise said: «Let us have a race.»",
+        "The hare ran very fast and then decided to sleep.",
+        "The slow tortoise walked and walked without stopping.",
+        "In the end, the tortoise won the race."
+      ],
+      "vocab": [
+        {"en": "said", "tr": "söyledi", "note": "to say = söylemek"},
+        {"en": "ran", "tr": "koştu", "note": "to run = koşmak"},
+        {"en": "sleep", "tr": "uyumak", "note": ""},
+        {"en": "walked", "tr": "yürüdü", "note": "to walk = yürümek"},
+        {"en": "won", "tr": "kazandı", "note": "to win = kazanmak"}
+      ]
+    }
+  ],
+  "quiz": [
+    {"q": "Who is the fast animal?", "options": ["The tortoise", "The hare", "The dog"], "answer": 1},
+    {"q": "What did the hare do during the race?", "options": ["He slept", "He ate", "He swam"], "answer": 0},
+    {"q": "Who won the race?", "options": ["The hare", "The tortoise", "Nobody"], "answer": 1}
+  ]
+}

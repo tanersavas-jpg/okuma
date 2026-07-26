@@ -1,0 +1,1324 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5">
+<meta name="theme-color" content="#3f6b4c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Okuma">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<title>Okuma — İngilizce & İtalyanca</title>
+<style>
+/* ===================== TEMA & DEĞİŞKENLER ===================== */
+:root{
+  --kagit:#f6efe0;        /* krem sayfa */
+  --kagit-2:#efe6d2;      /* kart zemini */
+  --metin:#2f2a22;        /* koyu okuma metni */
+  --metin-2:#6b6355;      /* ikincil metin */
+  --yesil:#3f6b4c;        /* ana yeşil */
+  --yesil-koyu:#2c4e37;
+  --yesil-acik:#e4efe4;
+  --sari:#ffe9a8;         /* vurgu (highlight) */
+  --cizgi:#e0d6bf;
+  --golge:0 2px 10px rgba(60,50,30,.12);
+  --dogru:#2e7d43;
+  --yanlis:#c0492f;
+  --okuma-boyut:22px;     /* okuyucu font boyutu (ayarlanır) */
+}
+:root[data-tema="koyu"]{
+  --kagit:#20242a;
+  --kagit-2:#2a2f37;
+  --metin:#ece6da;
+  --metin-2:#a9a293;
+  --yesil:#6fae82;
+  --yesil-koyu:#4f8663;
+  --yesil-acik:#2c3a30;
+  --sari:#6a5a26;
+  --cizgi:#3a4048;
+  --golge:0 2px 12px rgba(0,0,0,.35);
+}
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;height:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  background:var(--kagit); color:var(--metin);
+  overscroll-behavior-y:none;
+}
+.gizli{display:none !important}
+
+/* ===================== ÜST ÇUBUK ===================== */
+.ustcubuk{
+  position:sticky; top:0; z-index:20;
+  display:flex; align-items:center; gap:10px;
+  padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;
+  background:var(--yesil); color:#fff;
+  box-shadow:var(--golge);
+}
+.ustcubuk h1{font-size:19px; margin:0; font-weight:600; flex:1;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.ustcubuk .geri{font-size:24px; background:none; border:none; color:#fff;
+  padding:4px 6px; cursor:pointer; line-height:1}
+.ustcubuk .arac{font-size:22px; background:none; border:none; color:#fff;
+  padding:6px 8px; cursor:pointer; line-height:1}
+
+/* ===================== BUTONLAR ===================== */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  font-size:17px; font-weight:600; padding:14px 20px; border-radius:14px;
+  border:none; cursor:pointer; background:var(--yesil); color:#fff;
+  box-shadow:var(--golge); min-height:52px;
+}
+.btn.ikincil{background:var(--kagit-2); color:var(--metin); border:1px solid var(--cizgi); box-shadow:none}
+.btn.tam{width:100%}
+.btn:active{transform:translateY(1px)}
+
+/* ===================== EKRAN ÇERÇEVE ===================== */
+.ekran{min-height:100%; padding:16px; padding-bottom:calc(env(safe-area-inset-bottom) + 24px); max-width:820px; margin:0 auto}
+
+/* ===================== KÜTÜPHANE ===================== */
+.kutuphane-baslik{display:flex; align-items:center; gap:10px; margin:6px 2px 16px}
+.kutuphane-baslik span{font-size:14px; color:var(--metin-2)}
+
+.kart{
+  background:var(--kagit-2); border:1px solid var(--cizgi);
+  border-radius:16px; padding:16px; margin-bottom:14px;
+  box-shadow:var(--golge); cursor:pointer; position:relative;
+}
+.kart h3{margin:0 0 6px; font-size:20px}
+.kart .rozetler{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px}
+.rozet{font-size:13px; padding:4px 10px; border-radius:20px;
+  background:var(--yesil-acik); color:var(--yesil-koyu); font-weight:600}
+.rozet.skor{background:#e9f3ea; color:var(--dogru)}
+.ilerleme-cubuk{height:9px; background:var(--cizgi); border-radius:6px; overflow:hidden}
+.ilerleme-cubuk > i{display:block; height:100%; background:var(--yesil); border-radius:6px; transition:width .3s}
+.kart .yuzde{font-size:13px; color:var(--metin-2); margin-top:6px}
+.kart .sil{position:absolute; top:10px; left:10px; background:none; border:none;
+  font-size:20px; color:var(--metin-2); padding:6px; cursor:pointer; opacity:.6}
+
+.bos-durum{text-align:center; color:var(--metin-2); padding:60px 20px}
+.bos-durum .amblem{font-size:56px; margin-bottom:12px}
+.bos-durum p{font-size:16px; line-height:1.6}
+
+.ekle-cubuk{position:sticky; bottom:0; padding:14px 0 calc(env(safe-area-inset-bottom) + 8px);
+  background:linear-gradient(to top, var(--kagit) 70%, transparent)}
+
+/* ===================== OKUYUCU ===================== */
+#okumaBar{position:sticky; top:0; height:5px; background:var(--cizgi); z-index:10}
+#okumaBar > i{display:block; height:100%; width:0; background:var(--yesil); transition:width .3s}
+.okuma-arac-satir{display:flex; justify-content:flex-end; margin:12px 2px 8px}
+.ok-araclar{display:flex; gap:6px; flex-shrink:0}
+.ok-araclar button{background:var(--kagit-2); border:1px solid var(--cizgi); color:var(--metin);
+  border-radius:10px; padding:8px 11px; font-size:15px; font-weight:600; cursor:pointer; line-height:1}
+.ok-araclar button.aktif{background:var(--sari); border-color:var(--sari); color:var(--metin)}
+
+/* --- KİTAP SAYFASI --- */
+.kitap-sayfa{
+  max-width:660px; margin:4px auto 18px; position:relative;
+  background:
+    linear-gradient(90deg, rgba(120,90,40,.05), rgba(120,90,40,0) 6%),
+    linear-gradient(180deg,#fdfaf0,#f4ecd8);
+  border:1px solid #e6dcc3; border-radius:5px;
+  padding:40px 38px 30px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.7),
+              0 12px 30px rgba(70,55,25,.16),
+              0 2px 6px rgba(70,55,25,.10);
+}
+.kitap-sayfa:before{ /* cilt gölgesi (sol) */
+  content:""; position:absolute; left:0; top:0; bottom:0; width:16px;
+  background:linear-gradient(90deg, rgba(90,65,25,.12), rgba(90,65,25,0));
+  border-radius:5px 0 0 5px; pointer-events:none;
+}
+:root[data-tema="koyu"] .kitap-sayfa{
+  background:linear-gradient(180deg,#2b3138,#252a30);
+  border-color:#3a4048;
+  box-shadow:0 12px 30px rgba(0,0,0,.4), 0 2px 6px rgba(0,0,0,.3);
+}
+.kitap-bolum{
+  font-family:Georgia,"Iowan Old Style",serif; text-align:center; font-style:italic;
+  font-size:16px; color:var(--metin-2); margin:0 0 22px; padding-bottom:16px;
+  border-bottom:1px solid var(--cizgi); letter-spacing:.2px;
+}
+.kitap-numara{ text-align:center; margin-top:26px; padding-top:8px;
+  font-family:Georgia,serif; font-size:14px; color:var(--metin-2); }
+
+#okumaMetin{
+  font-family:Georgia,"Times New Roman","Iowan Old Style",serif;
+  font-size:var(--okuma-boyut); line-height:2.0; color:var(--metin);
+  text-align:justify; -webkit-hyphens:auto; hyphens:auto;
+  -webkit-user-select:none; user-select:none;
+}
+/* akıcı paragraf: cümleler yan yana aksın (kitap gibi) */
+.cumle{ display:inline; transition:background .15s; border-radius:3px; }
+.cumle.vurgu{ background:var(--sari); box-decoration-break:clone;
+  -webkit-box-decoration-break:clone; padding:1px 0; }
+.cumle.okunuyor{ background:var(--yesil-acik); box-decoration-break:clone;
+  -webkit-box-decoration-break:clone; }
+.kel{cursor:pointer; padding:1px 1px; border-radius:4px}
+.kel.var{border-bottom:2px dotted var(--yesil)}       /* sözlükte karşılığı olan kelime */
+.kel.secili{background:var(--yesil); color:#fff}
+
+.okuma-alt{display:flex; align-items:center; gap:12px; margin-top:10px}
+.okuma-alt button{flex:1; padding:16px; border-radius:14px; border:1px solid var(--cizgi);
+  background:var(--kagit-2); color:var(--metin); font-size:16px; font-weight:600; cursor:pointer; min-height:56px}
+.okuma-alt button:disabled{opacity:.4}
+.okuma-alt button.test{background:var(--yesil); color:#fff; border-color:var(--yesil)}
+.okuma-alt .sayfabilgi{flex:0 0 auto; font-size:14px; color:var(--metin-2); min-width:52px; text-align:center}
+
+/* kelime baloncuğu */
+#baloncuk{
+  position:fixed; z-index:60; max-width:280px;
+  background:var(--metin); color:var(--kagit);
+  padding:12px 15px; border-radius:14px; box-shadow:var(--golge);
+  font-family:-apple-system,sans-serif;
+}
+#baloncuk .kel-src{font-size:14px; opacity:.7; margin-bottom:2px}
+#baloncuk .kel-tr{font-size:19px; font-weight:700}
+#baloncuk .kel-not{font-size:13px; opacity:.85; margin-top:5px; line-height:1.4}
+#baloncuk .yok{font-size:15px; opacity:.85}
+#baloncuk:after{content:""; position:absolute; bottom:-8px; left:var(--ok,24px);
+  border:8px solid transparent; border-top-color:var(--metin); border-bottom:0}
+#baloncuk.ust:after{bottom:auto; top:-8px; border-top:0; border-bottom-color:var(--metin)}
+
+.ipucu{text-align:center; font-size:13px; color:var(--metin-2); margin:2px 0 12px}
+
+/* kelime durum renkleri (0 bilmiyorum · 1 öğreniyorum · 2 biliyorum=sade) */
+.kel.d0{background:#f8d7cf}
+.kel.d1{background:#fdeaa8}
+:root[data-tema="koyu"] .kel.d0{background:#5a2f26; color:#f3d9d2}
+:root[data-tema="koyu"] .kel.d1{background:#5a4c1e; color:#f0e6c4}
+.kel.secili{background:var(--yesil) !important; color:#fff !important}
+
+/* baloncuk içi durum + seslendirme butonları */
+#baloncuk .kel-eylem{display:flex; gap:6px; margin-top:10px}
+#baloncuk .kel-eylem button{flex:1; border:none; border-radius:9px; padding:9px 4px;
+  font-size:13px; font-weight:700; cursor:pointer; color:#3a3226}
+#baloncuk .kel-eylem .b0{background:#f3b6a8} #baloncuk .kel-eylem .b1{background:#f5d873}
+#baloncuk .kel-eylem .b2{background:#a9d9b4}
+#baloncuk .kel-eylem button.secili{outline:3px solid var(--kagit)}
+#baloncuk .kel-ses{margin-top:8px; width:100%; background:var(--yesil); color:#fff;
+  border:none; border-radius:9px; padding:9px; font-size:14px; font-weight:600; cursor:pointer}
+
+.cumle.okunuyor{background:var(--yesil-acik)}
+:root[data-tema="koyu"] .cumle.okunuyor{background:var(--yesil-acik)}
+
+/* kütüphane hızlı bağlantılar */
+.hizli{display:flex; gap:10px; margin:0 2px 16px}
+.hizli button{flex:1; background:var(--kagit-2); border:1px solid var(--cizgi); color:var(--metin);
+  border-radius:14px; padding:14px; font-size:15px; font-weight:600; cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; gap:4px}
+.hizli button b{font-size:20px; color:var(--yesil); font-weight:800}
+:root[data-tema="koyu"] .hizli button b{color:var(--yesil)}
+
+/* KELİMELERİM ekranı */
+.durum-sekme{display:flex; gap:8px; margin:2px 0 16px; overflow-x:auto; -webkit-overflow-scrolling:touch}
+.durum-sekme button{white-space:nowrap; padding:8px 14px; border-radius:20px; border:1px solid var(--cizgi);
+  background:var(--kagit-2); color:var(--metin); font-size:14px; font-weight:600; cursor:pointer}
+.durum-sekme button.aktif{background:var(--yesil); color:#fff; border-color:var(--yesil)}
+.kelime-oge{display:flex; align-items:center; gap:12px; background:var(--kagit-2);
+  border:1px solid var(--cizgi); border-radius:14px; padding:14px 16px; margin-bottom:10px}
+.kelime-oge .nokta{flex:0 0 12px; width:12px; height:12px; border-radius:50%}
+.kelime-oge .nokta.d0{background:#d9694a} .kelime-oge .nokta.d1{background:#e0b13a} .kelime-oge .nokta.d2{background:#4f9d67}
+.kelime-oge .orta{flex:1; min-width:0}
+.kelime-oge .kkelime{font-size:18px; font-weight:700}
+.kelime-oge .ktr{font-size:15px; color:var(--metin-2)}
+.kelime-oge .kornek{font-size:13px; color:var(--metin-2); font-style:italic; margin-top:3px;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.kelime-oge .kses{background:none; border:none; font-size:20px; cursor:pointer; padding:6px}
+
+/* İSTATİSTİK ekranı */
+.ist-ozet{display:flex; gap:12px; margin-bottom:18px}
+.ist-kart{flex:1; background:var(--kagit-2); border:1px solid var(--cizgi); border-radius:16px;
+  padding:18px 12px; text-align:center; box-shadow:var(--golge)}
+.ist-kart .buyuk{font-size:32px; font-weight:800; color:var(--yesil)}
+.ist-kart .alt{font-size:13px; color:var(--metin-2); margin-top:4px}
+:root[data-tema="koyu"] .ist-kart .buyuk{color:var(--yesil)}
+.ist-grafik{background:var(--kagit-2); border:1px solid var(--cizgi); border-radius:16px; padding:18px 16px}
+.ist-grafik h4{margin:0 0 14px; font-size:15px; color:var(--metin-2)}
+.cubuklar{display:flex; align-items:flex-end; gap:8px; height:120px}
+.cubuklar .gun{flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; height:100%}
+.cubuklar .cbar{width:100%; background:var(--yesil); border-radius:6px 6px 0 0; min-height:3px; transition:height .3s;
+  margin-top:auto}
+.cubuklar .cgun{font-size:11px; color:var(--metin-2)}
+.cubuklar .cdeg{font-size:11px; color:var(--metin-2); font-weight:600}
+
+/* ===================== TEST ===================== */
+.test-ust{margin:6px 2px 14px}
+.test-ust .ilerleme-cubuk{margin-top:10px}
+.test-ust .soru-sayac{font-size:14px; color:var(--metin-2); font-weight:600}
+.soru-kart{background:var(--kagit-2); border:1px solid var(--cizgi); border-radius:16px;
+  padding:20px; box-shadow:var(--golge); margin-bottom:16px}
+.soru-kart .soru{font-size:20px; font-weight:600; line-height:1.5; margin-bottom:4px}
+.secenekler{display:flex; flex-direction:column; gap:12px}
+.secenek{display:flex; align-items:center; gap:12px; text-align:left;
+  padding:16px 18px; border-radius:14px; border:2px solid var(--cizgi);
+  background:var(--kagit); color:var(--metin); font-size:17px; cursor:pointer; min-height:56px}
+.secenek .harf{flex:0 0 28px; height:28px; border-radius:8px; background:var(--yesil-acik);
+  color:var(--yesil-koyu); font-weight:700; display:flex; align-items:center; justify-content:center; font-size:15px}
+.secenek.dogru{border-color:var(--dogru); background:#e9f6ec}
+.secenek.dogru .harf{background:var(--dogru); color:#fff}
+.secenek.yanlis{border-color:var(--yanlis); background:#fbeae6}
+.secenek.yanlis .harf{background:var(--yanlis); color:#fff}
+:root[data-tema="koyu"] .secenek.dogru{background:#233528}
+:root[data-tema="koyu"] .secenek.yanlis{background:#3a2420}
+.secenek:disabled{cursor:default}
+
+.test-sonuc{text-align:center; padding:24px 12px}
+.test-sonuc .skor{font-size:52px; font-weight:800; color:var(--yesil)}
+.test-sonuc .skor small{font-size:22px; color:var(--metin-2); font-weight:600}
+.test-sonuc .mesaj{font-size:18px; margin:8px 0 20px; color:var(--metin-2)}
+.yanlis-liste{text-align:left; margin-top:8px}
+.yanlis-liste h4{font-size:15px; color:var(--metin-2); margin:20px 2px 10px}
+.yanlis-oge{background:var(--kagit-2); border:1px solid var(--cizgi); border-radius:14px; padding:14px 16px; margin-bottom:10px}
+.yanlis-oge .s{font-weight:600; margin-bottom:6px}
+.yanlis-oge .d{color:var(--dogru); font-size:15px}
+.test-butonlar{display:flex; gap:12px; margin-top:16px}
+.test-butonlar .btn{flex:1}
+
+/* ===================== AYARLAR ===================== */
+.ayar-grup{background:var(--kagit-2); border:1px solid var(--cizgi);
+  border-radius:16px; padding:6px 16px; margin-bottom:16px}
+.ayar-satir{display:flex; align-items:center; justify-content:space-between;
+  padding:16px 0; border-bottom:1px solid var(--cizgi); gap:12px}
+.ayar-satir:last-child{border-bottom:none}
+.ayar-satir .etiket{font-size:16px}
+.ayar-satir .etiket small{display:block; color:var(--metin-2); font-size:13px; margin-top:2px}
+.secim{display:flex; gap:8px}
+.secim button{padding:8px 14px; border-radius:10px; border:1px solid var(--cizgi);
+  background:var(--kagit); color:var(--metin); font-size:15px; cursor:pointer; font-weight:600}
+.secim button.aktif{background:var(--yesil); color:#fff; border-color:var(--yesil)}
+
+/* ===================== BİLDİRİM (toast) ===================== */
+#toast{position:fixed; left:50%; bottom:calc(env(safe-area-inset-bottom) + 20px);
+  transform:translateX(-50%) translateY(20px); background:var(--metin); color:var(--kagit);
+  padding:12px 20px; border-radius:12px; font-size:15px; opacity:0; pointer-events:none;
+  transition:.25s; z-index:100; max-width:90%; text-align:center; box-shadow:var(--golge)}
+#toast.gor{opacity:1; transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- ============ ÜST ÇUBUK ============ -->
+<header class="ustcubuk">
+  <button class="geri gizli" id="geriBtn" aria-label="Geri">‹</button>
+  <h1 id="baslik">Okuma</h1>
+  <button class="arac" id="ayarBtn" aria-label="Ayarlar">⚙︎</button>
+</header>
+
+<!-- ============ KÜTÜPHANE EKRANI ============ -->
+<main class="ekran" id="ekranKutuphane">
+  <div class="hizli">
+    <button id="acKelimeler"><b id="hizliKelimeSayi">0</b>📕 Kelimelerim</button>
+    <button id="acIstatistik"><b id="hizliSeri">0🔥</b>📊 İstatistik</button>
+  </div>
+  <div class="kutuphane-baslik">
+    <span id="kutupSayi"></span>
+  </div>
+  <div id="kartListe"></div>
+  <div class="ekle-cubuk">
+    <button class="btn tam" id="ekleBtn">＋ Hikâye ekle (.json)</button>
+  </div>
+</main>
+
+<!-- ============ OKUYUCU EKRANI ============ -->
+<main class="ekran gizli" id="ekranOkuyucu" style="padding-top:0">
+  <div id="okumaBar"><i></i></div>
+  <div class="okuma-arac-satir">
+    <div class="ok-araclar">
+      <button id="okSesBtn" title="Sesli oku">🔊</button>
+      <button id="yerImiBtn" title="Yer imi">🔖</button>
+      <button id="okFontKucult" title="Küçült">A−</button>
+      <button id="okFontBuyut" title="Büyüt">A+</button>
+    </div>
+  </div>
+  <div class="ipucu">Kelimeye dokun → anlamı · cümleye uzun bas → işaretle</div>
+  <div class="kitap-sayfa">
+    <div class="kitap-bolum" id="okBolum"></div>
+    <div id="okumaMetin"></div>
+    <div class="kitap-numara" id="kitapNumara"></div>
+  </div>
+  <div class="okuma-alt">
+    <button id="oncekiBtn">‹ Önceki</button>
+    <span class="sayfabilgi" id="sayfaBilgi"></span>
+    <button id="sonrakiBtn">Sonraki ›</button>
+  </div>
+</main>
+
+<div id="baloncuk" class="gizli"></div>
+
+<!-- ============ TEST EKRANI (Adım 3) ============ -->
+<main class="ekran gizli" id="ekranTest">
+  <p style="color:var(--metin-2)">Test ekranı Adım 3'te gelecek.</p>
+</main>
+
+<!-- ============ KELİMELERİM EKRANI ============ -->
+<main class="ekran gizli" id="ekranKelimeler">
+  <div class="durum-sekme" id="durumSekme">
+    <button data-f="hepsi" class="aktif">Hepsi</button>
+    <button data-f="0">🔴 Bilmiyorum</button>
+    <button data-f="1">🟡 Öğreniyorum</button>
+    <button data-f="2">🟢 Biliyorum</button>
+  </div>
+  <div id="kelimeListe"></div>
+</main>
+
+<!-- ============ İSTATİSTİK EKRANI ============ -->
+<main class="ekran gizli" id="ekranIstatistik">
+  <div class="ist-ozet">
+    <div class="ist-kart"><div class="buyuk" id="istSeri">0</div><div class="alt">gün seri 🔥</div></div>
+    <div class="ist-kart"><div class="buyuk" id="istBugun">0</div><div class="alt">bugün kelime</div></div>
+    <div class="ist-kart"><div class="buyuk" id="istToplam">0</div><div class="alt">toplam kelime</div></div>
+  </div>
+  <div class="ist-grafik">
+    <h4>Son 7 gün</h4>
+    <div class="cubuklar" id="istCubuklar"></div>
+  </div>
+</main>
+
+<!-- ============ AYARLAR EKRANI ============ -->
+<main class="ekran gizli" id="ekranAyarlar">
+  <div class="ayar-grup">
+    <div class="ayar-satir">
+      <div class="etiket">Tema<small>Okuma zeminini seçin</small></div>
+      <div class="secim" id="temaSecim">
+        <button data-tema="acik">Açık</button>
+        <button data-tema="koyu">Koyu</button>
+      </div>
+    </div>
+    <div class="ayar-satir">
+      <div class="etiket">Yazı boyutu<small>Okuyucu metni</small></div>
+      <div class="secim">
+        <button id="fontKucult">A−</button>
+        <button id="fontBuyut">A+</button>
+      </div>
+    </div>
+  </div>
+  <div class="ayar-grup">
+    <div class="ayar-satir">
+      <div class="etiket">Yedekle<small>Tüm ilerlemeyi .json olarak indir</small></div>
+      <button class="btn ikincil" id="disaAktarBtn">Dışa aktar</button>
+    </div>
+    <div class="ayar-satir">
+      <div class="etiket">Geri yükle<small>Yedeği içe aktar</small></div>
+      <button class="btn ikincil" id="iceAktarBtn">İçe aktar</button>
+    </div>
+  </div>
+  <p style="text-align:center;color:var(--metin-2);font-size:13px">Okuma · İngilizce &amp; İtalyanca · çevrimdışı çalışır</p>
+</main>
+
+<!-- gizli dosya seçiciler -->
+<input type="file" id="dosyaGiris" accept=".json,application/json" class="gizli">
+<input type="file" id="yedekGiris" accept=".json,application/json" class="gizli">
+
+<div id="toast"></div>
+
+<script>
+"use strict";
+
+/* =====================================================================
+   1) INDEXEDDB KATMANI
+   Store'lar:
+     - stories  (keyPath story_id)  → yüklenen hikâye JSON'u (şema aynen)
+     - progress (keyPath story_id)  → { story_id, lastPage, bookmark,
+                                        highlights:{pageNo:[cümleIndex]},
+                                        quiz:{correct,total,wrong[]}, updatedAt }
+   ===================================================================== */
+const DB = (() => {
+  const AD = "italyanca-okuma", SURUM = 2;
+  let _db = null;
+
+  function ac(){
+    return new Promise((coz, hata) => {
+      if (_db) return coz(_db);
+      const istek = indexedDB.open(AD, SURUM);
+      istek.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains("stories"))
+          db.createObjectStore("stories", { keyPath: "story_id" });
+        if (!db.objectStoreNames.contains("progress"))
+          db.createObjectStore("progress", { keyPath: "story_id" });
+        // v2: kelime defteri + durum (anahtar = "dil|kelime") · istatistik
+        if (!db.objectStoreNames.contains("kelimeler"))
+          db.createObjectStore("kelimeler", { keyPath: "anahtar" });
+        if (!db.objectStoreNames.contains("istatistik"))
+          db.createObjectStore("istatistik", { keyPath: "id" });
+      };
+      istek.onsuccess = () => { _db = istek.result; coz(_db); };
+      istek.onerror   = () => hata(istek.error);
+    });
+  }
+
+  function islem(store, mod, isFn){
+    return ac().then(db => new Promise((coz, hata) => {
+      const t = db.transaction(store, mod);
+      const s = t.objectStore(store);
+      const r = isFn(s);
+      t.oncomplete = () => coz(r && r.result !== undefined ? r.result : r);
+      t.onerror    = () => hata(t.error);
+      t.onabort    = () => hata(t.error);
+    }));
+  }
+
+  const tumu = (store) => islem(store, "readonly", s => {
+    const out = []; // getAll sarmalayıcı
+    return { get result(){ return out; }, _p: (()=>{})() } && (() => {
+      const req = s.getAll();
+      req.onsuccess = () => out.push(...req.result);
+      return { result: out };
+    })();
+  });
+
+  // Basit ve güvenilir yardımcılar (getAll ile)
+  function hepsiniGetir(store){
+    return ac().then(db => new Promise((coz,hata)=>{
+      const t = db.transaction(store,"readonly");
+      const req = t.objectStore(store).getAll();
+      req.onsuccess = () => coz(req.result || []);
+      req.onerror   = () => hata(req.error);
+    }));
+  }
+  function getir(store, key){
+    return ac().then(db => new Promise((coz,hata)=>{
+      const t = db.transaction(store,"readonly");
+      const req = t.objectStore(store).get(key);
+      req.onsuccess = () => coz(req.result || null);
+      req.onerror   = () => hata(req.error);
+    }));
+  }
+  function koy(store, deger){
+    return ac().then(db => new Promise((coz,hata)=>{
+      const t = db.transaction(store,"readwrite");
+      t.objectStore(store).put(deger);
+      t.oncomplete = () => coz(true);
+      t.onerror    = () => hata(t.error);
+    }));
+  }
+  function sil(store, key){
+    return ac().then(db => new Promise((coz,hata)=>{
+      const t = db.transaction(store,"readwrite");
+      t.objectStore(store).delete(key);
+      t.oncomplete = () => coz(true);
+      t.onerror    = () => hata(t.error);
+    }));
+  }
+
+  return { hepsiniGetir, getir, koy, sil };
+})();
+
+/* =====================================================================
+   2) UYGULAMA DURUMU & YARDIMCILAR
+   ===================================================================== */
+const $ = (sel) => document.querySelector(sel);
+const olustur = (etiket, sinif) => { const e=document.createElement(etiket); if(sinif) e.className=sinif; return e; };
+
+function toast(mesaj){
+  const t = $("#toast"); t.textContent = mesaj; t.classList.add("gor");
+  clearTimeout(toast._t); toast._t = setTimeout(()=>t.classList.remove("gor"), 2200);
+}
+
+// İlerleme kaydını getir ya da varsayılan oluştur
+function bosIlerleme(story_id){
+  // lastPage:0 → henüz açılmadı (%0). Okuyucu açılınca 1'e yükselir.
+  return { story_id, lastPage:0, bookmark:null, highlights:{}, quiz:null, updatedAt:Date.now() };
+}
+
+// Dil kodunu okunur etikete çevir (İngilizce + İtalyanca; başkası da eklenebilir)
+function dilEtiket(kod){
+  const m = { it:"🇮🇹 İtalyanca", en:"🇬🇧 İngilizce", tr:"🇹🇷 Türkçe",
+              es:"🇪🇸 İspanyolca", fr:"🇫🇷 Fransızca", de:"🇩🇪 Almanca" };
+  return m[(kod||"").toLowerCase()] || (kod ? kod.toUpperCase() : "Dil ?");
+}
+
+// Ayarlar (localStorage — küçük tercih verisi; hikâyeler IndexedDB'de)
+const Ayar = {
+  al(k, v){ const x = localStorage.getItem("ayar_"+k); return x===null ? v : x; },
+  koy(k, v){ localStorage.setItem("ayar_"+k, v); },
+};
+
+function temaUygula(){
+  const t = Ayar.al("tema","acik");
+  document.documentElement.setAttribute("data-tema", t);
+  document.querySelectorAll("#temaSecim button").forEach(b =>
+    b.classList.toggle("aktif", b.dataset.tema === t));
+  $("#temaSecim").parentElement; // no-op
+}
+function fontUygula(){
+  const px = parseInt(Ayar.al("font","22"),10);
+  document.documentElement.style.setProperty("--okuma-boyut", px+"px");
+}
+
+/* =====================================================================
+   3) YÖNLENDİRME (basit ekran değiştirme)
+   ===================================================================== */
+const EKRANLAR = ["Kutuphane","Okuyucu","Test","Kelimeler","Istatistik","Ayarlar"];
+let aktifEkran = "Kutuphane";
+let oncekiEkran = "Kutuphane";
+
+function ekranGoster(ad, baslik){
+  oncekiEkran = (ad === "Ayarlar" || ad === "Okuyucu" || ad === "Test") ? aktifEkran : "Kutuphane";
+  aktifEkran = ad;
+  EKRANLAR.forEach(e => $("#ekran"+e).classList.toggle("gizli", e !== ad));
+  $("#baslik").textContent = baslik || "Okuma";
+  const koklu = (ad === "Kutuphane");
+  $("#geriBtn").classList.toggle("gizli", koklu);
+  $("#ayarBtn").classList.toggle("gizli", ad === "Ayarlar");
+  window.scrollTo(0,0);
+}
+
+/* =====================================================================
+   4) KÜTÜPHANE EKRANI
+   ===================================================================== */
+async function kutuphaneCiz(){
+  const [hikayeler, ilerlemeler] = await Promise.all([
+    DB.hepsiniGetir("stories"), DB.hepsiniGetir("progress")
+  ]);
+  const ilerMap = {}; ilerlemeler.forEach(p => ilerMap[p.story_id]=p);
+  const liste = $("#kartListe"); liste.innerHTML = "";
+
+  $("#kutupSayi").textContent = hikayeler.length
+    ? hikayeler.length + " hikâye" : "";
+
+  if (!hikayeler.length){
+    const bos = olustur("div","bos-durum");
+    bos.innerHTML = '<div class="amblem">📖</div>'+
+      '<p>Henüz hikâye yok.<br>Aşağıdaki <b>“Hikâye ekle”</b> ile bir <b>.json</b> dosyası yükleyin.</p>';
+    liste.appendChild(bos);
+    return;
+  }
+
+  hikayeler.sort((a,b)=> (ilerMap[b.story_id]?.updatedAt||0)-(ilerMap[a.story_id]?.updatedAt||0));
+
+  hikayeler.forEach(h => {
+    const p = ilerMap[h.story_id] || bosIlerleme(h.story_id);
+    const toplam = (h.pages||[]).length || 1;
+    const yuzde = Math.min(100, Math.round((p.lastPage/toplam)*100));
+    const kart = olustur("div","kart");
+    kart.innerHTML =
+      '<button class="sil" title="Sil">🗑</button>'+
+      '<h3></h3>'+
+      '<div class="rozetler"></div>'+
+      '<div class="ilerleme-cubuk"><i style="width:'+yuzde+'%"></i></div>'+
+      '<div class="yuzde">'+(p.lastPage ? '%'+yuzde+' · '+p.lastPage+'/'+toplam+' sayfa' : 'başlanmadı')+'</div>';
+    kart.querySelector("h3").textContent = h.title || "(başlıksız)";
+
+    const roz = kart.querySelector(".rozetler");
+    const rd = olustur("span","rozet"); rd.textContent = dilEtiket(h.language); roz.appendChild(rd);
+    const r1 = olustur("span","rozet"); r1.textContent = h.level || "—"; roz.appendChild(r1);
+    const r2 = olustur("span","rozet"); r2.textContent = toplam+" sayfa"; roz.appendChild(r2);
+    if (h.quiz && h.quiz.length){
+      const r3 = olustur("span","rozet"); r3.textContent = "🧩 test"; roz.appendChild(r3);
+    }
+    if (p.quiz){
+      const rs = olustur("span","rozet skor");
+      rs.textContent = "✓ "+p.quiz.correct+"/"+p.quiz.total; roz.appendChild(rs);
+    }
+
+    kart.addEventListener("click", () => hikayeAc(h.story_id));
+    kart.querySelector(".sil").addEventListener("click", (e) => {
+      e.stopPropagation(); hikayeSil(h);
+    });
+    liste.appendChild(kart);
+  });
+}
+
+async function hikayeSil(h){
+  if (!confirm('“'+(h.title||h.story_id)+'” silinsin mi?\nİlerleme ve test sonucu da silinir.')) return;
+  await DB.sil("stories", h.story_id);
+  await DB.sil("progress", h.story_id);
+  toast("Silindi");
+  kutuphaneCiz();
+}
+
+/* =====================================================================
+   OKUYUCU
+   ===================================================================== */
+const Okuyucu = {
+  hikaye:null, ilerleme:null, sayfaIx:0, vocab:[], srcKey:"it",
+  bekleyenKayit:null,
+};
+
+// Kelimeyi sadeleştir: küçük harf + baştaki/sondaki harf-olmayanları at
+function sadelestir(k){
+  return (k||"").toLowerCase().replace(/^[^\p{L}]+|[^\p{L}]+$/gu, "");
+}
+
+// Hikâyenin tüm vocab'ını tek dizine topla (kaynak dil anahtarıyla)
+function vocabIndeksle(h){
+  const srcKey = h.language && ["it","en","es","fr","de","tr"].includes(h.language)
+    ? h.language : null;
+  const out = [];
+  (h.pages||[]).forEach(sf => (sf.vocab||[]).forEach(v => {
+    const anahtar = srcKey && v[srcKey] !== undefined
+      ? srcKey
+      : Object.keys(v).find(k => k!=="tr" && k!=="note");
+    if (!anahtar || v[anahtar]==null) return;
+    out.push({ key:sadelestir(v[anahtar]), src:v[anahtar], tr:v.tr||"", note:v.note||"" });
+  }));
+  return { srcKey: srcKey || "it", liste: out };
+}
+
+// Bir kelimeye karşılık ara: tam → önek (kök) eşleşmesi
+function kelimeAra(kelime){
+  const n = sadelestir(kelime);
+  if (!n) return null;
+  const L = Okuyucu.vocab;
+  let m = L.find(v => v.key === n);                     // tam eşleşme
+  if (m) return m;
+  m = L.find(v => v.key.length>=3 && n.startsWith(v.key)); // kelime, sözlük halinden türemişse
+  if (m) return m;
+  m = L.find(v => n.length>=3 && v.key.startsWith(n));  // sözlük hali, kelimeden uzunsa
+  return m || null;
+}
+
+async function hikayeAc(story_id){
+  const [h, p] = await Promise.all([ DB.getir("stories",story_id), DB.getir("progress",story_id) ]);
+  if (!h) return;
+  const ip = p || bosIlerleme(story_id);
+  const idx = vocabIndeksle(h);
+  const durumlar = await durumlariYukle(idx.srcKey);
+  Object.assign(Okuyucu, { hikaye:h, ilerleme:ip, vocab:idx.liste, srcKey:idx.srcKey,
+                           durumlar, sayilanSayfalar:new Set() });
+  // kaldığı yerden devam: lastPage'e denk sayfa, yoksa ilk sayfa
+  let sayfaIx = (h.pages||[]).findIndex(s => s.page === ip.lastPage);
+  if (sayfaIx < 0) sayfaIx = 0;
+  Okuyucu.sayfaIx = sayfaIx;
+  ekranGoster("Okuyucu", h.title || "Okuyucu");
+  sayfaCiz();
+}
+
+function sayfaCiz(){
+  sesDurdur();                       // sayfa değişince sesli okumayı durdur
+  const { hikaye:h, sayfaIx } = Okuyucu;
+  const sayfalar = h.pages || [];
+  const sf = sayfalar[sayfaIx];
+  const toplam = sayfalar.length;
+
+  // ilerleme çubuğu
+  $("#okumaBar > i").style.width = Math.round(((sayfaIx+1)/toplam)*100) + "%";
+  $("#okBolum").textContent = sf.chapter || "";
+  $("#sayfaBilgi").textContent = (sayfaIx+1)+"/"+toplam;
+  $("#kitapNumara").textContent = "— " + sf.page + " —";
+
+  // yer imi durumu
+  $("#yerImiBtn").classList.toggle("aktif", Okuyucu.ilerleme.bookmark === sf.page);
+
+  // cümleleri çiz
+  const kap = $("#okumaMetin"); kap.innerHTML = "";
+  const vurgulu = (Okuyucu.ilerleme.highlights[sf.page]) || [];
+  (sf.sentences||[]).forEach((cumle, ci) => {
+    const p = olustur("p","cumle");
+    p.dataset.ci = ci;
+    if (vurgulu.includes(ci)) p.classList.add("vurgu");
+    // kelimelere böl (boşlukları koru)
+    cumle.split(/(\s+)/).forEach(par => {
+      if (/^\s+$/.test(par)){ p.appendChild(document.createTextNode(par)); return; }
+      const s = olustur("span","kel");
+      s.textContent = par;
+      if (kelimeAra(par)) s.classList.add("var");   // karşılığı varsa noktalı altçizgi
+      const d = Okuyucu.durumlar && Okuyucu.durumlar.get(sadelestir(par));
+      if (d===0 || d===1) s.classList.add("d"+d);   // bilmiyorum/öğreniyorum renklensin
+      p.appendChild(s);
+    });
+    cumleEtkilesim(p);
+    kap.appendChild(p);
+    kap.appendChild(document.createTextNode(" ")); // cümleler arası boşluk (akıcı paragraf)
+  });
+
+  // gezinme butonları
+  $("#oncekiBtn").disabled = (sayfaIx === 0);
+  const sonSayfa = (sayfaIx === toplam-1);
+  const sonBtn = $("#sonrakiBtn");
+  if (sonSayfa && h.quiz && h.quiz.length){
+    sonBtn.textContent = "🧩 Testi çöz"; sonBtn.classList.add("test"); sonBtn.disabled = false;
+  } else {
+    sonBtn.textContent = "Sonraki ›"; sonBtn.classList.remove("test"); sonBtn.disabled = sonSayfa;
+  }
+
+  // "kaldığım yer" kaydet
+  ilerlemeKaydet({ lastPage: sf.page });
+
+  // istatistik: bu sayfa bu oturumda ilk kez görülüyorsa kelimelerini say
+  if (Okuyucu.sayilanSayfalar && !Okuyucu.sayilanSayfalar.has(sf.page)){
+    Okuyucu.sayilanSayfalar.add(sf.page);
+    const kelimeSayisi = (sf.sentences||[]).reduce((t,c)=> t + c.split(/\s+/).filter(Boolean).length, 0);
+    if (kelimeSayisi) istEkle(kelimeSayisi);
+  }
+
+  baloncukKapat();
+  window.scrollTo(0,0);
+}
+
+// Cümle: kelime dokunma (kısa) + vurgulama (uzun bas)
+function cumleEtkilesim(p){
+  let zaman=null, basX=0, basY=0, uzunOldu=false;
+
+  const baslat = (x,y) => {
+    basX=x; basY=y; uzunOldu=false;
+    zaman = setTimeout(() => { uzunOldu = true; vurguDegis(p); }, 500);
+  };
+  const bitir = () => { clearTimeout(zaman); zaman=null; };
+  const hareket = (x,y) => { if (Math.abs(x-basX)>10 || Math.abs(y-basY)>10) bitir(); };
+
+  p.addEventListener("pointerdown", e => baslat(e.clientX, e.clientY));
+  p.addEventListener("pointermove", e => hareket(e.clientX, e.clientY));
+  p.addEventListener("pointerup", bitir);
+  p.addEventListener("pointercancel", bitir);
+  p.addEventListener("pointerleave", bitir);
+
+  // kelime dokunma — uzun bas olduysa yut
+  p.addEventListener("click", e => {
+    if (uzunOldu){ uzunOldu=false; return; }
+    const kel = e.target.closest(".kel");
+    if (!kel) return;
+    kelimeGoster(kel);
+  });
+}
+
+function vurguDegis(p){
+  const sf = Okuyucu.hikaye.pages[Okuyucu.sayfaIx];
+  const ci = parseInt(p.dataset.ci,10);
+  const H = Okuyucu.ilerleme.highlights;
+  const dizi = H[sf.page] ? H[sf.page].slice() : [];
+  const i = dizi.indexOf(ci);
+  if (i<0){ dizi.push(ci); p.classList.add("vurgu"); }
+  else { dizi.splice(i,1); p.classList.remove("vurgu"); }
+  if (dizi.length) H[sf.page] = dizi; else delete H[sf.page];
+  ilerlemeKaydet({});
+  if (navigator.vibrate) navigator.vibrate(15);
+}
+
+// Kelime baloncuğu göster (çeviri + durum butonları + seslendirme)
+function kelimeGoster(kelSpan){
+  document.querySelectorAll(".kel.secili").forEach(k=>k.classList.remove("secili"));
+  kelSpan.classList.add("secili");
+  const lang = Okuyucu.srcKey;
+  const ham = kelSpan.textContent;
+  const sade = sadelestir(ham);
+  const bulunan = kelimeAra(ham);
+  const mevcutDurum = Okuyucu.durumlar ? Okuyucu.durumlar.get(sade) : undefined;
+  // örnek cümle
+  const cumleEl = kelSpan.closest(".cumle");
+  const ci = cumleEl ? parseInt(cumleEl.dataset.ci,10) : -1;
+  const ornek = (ci>=0) ? (Okuyucu.hikaye.pages[Okuyucu.sayfaIx].sentences[ci]||"") : "";
+
+  const b = $("#baloncuk");
+  let html = '<div class="kel-src">'+ (bulunan ? bulunan.src : sade) +'</div>';
+  html += '<div class="kel-tr">'+ (bulunan ? (bulunan.tr||"—") : "çeviri yok") +'</div>';
+  if (bulunan && bulunan.note) html += '<div class="kel-not">'+bulunan.note+'</div>';
+  html += '<div class="kel-eylem">'+
+    '<button class="b0'+(mevcutDurum===0?" secili":"")+'" data-d="0">Bilmiyorum</button>'+
+    '<button class="b1'+(mevcutDurum===1?" secili":"")+'" data-d="1">Öğreniyorum</button>'+
+    '<button class="b2'+(mevcutDurum===2?" secili":"")+'" data-d="2">Biliyorum</button></div>';
+  if (sesVarMi(lang)) html += '<button class="kel-ses">🔊 Seslendir</button>';
+  b.innerHTML = html;
+
+  // güvenli metin (kaçış için) — çeviri/not zaten düz metin ama emin olalım
+  b.querySelector(".kel-src").textContent = bulunan ? bulunan.src : sade;
+  b.querySelector(".kel-tr").textContent  = bulunan ? (bulunan.tr||"—") : "çeviri yok";
+  if (bulunan && bulunan.note) b.querySelector(".kel-not").textContent = bulunan.note;
+
+  b.querySelectorAll(".kel-eylem button").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const durum = parseInt(btn.dataset.d,10);
+      await kelimeDurumAyarla(lang, ham, durum, bulunan&&bulunan.tr, bulunan&&bulunan.note, ornek, Okuyucu.hikaye);
+      b.querySelectorAll(".kel-eylem button").forEach(x=>x.classList.remove("secili"));
+      btn.classList.add("secili");
+      kelimeleriRenklendir(sade, durum);
+      kelSpan.classList.add("secili");  // seçili görünümü koru
+      hizliRozetGuncelle();
+      if (navigator.vibrate) navigator.vibrate(10);
+    });
+  });
+  const sesBtn = b.querySelector(".kel-ses");
+  if (sesBtn) sesBtn.addEventListener("click", () => konus(bulunan?bulunan.src:sade, lang));
+
+  b.classList.remove("gizli");
+  konumBaloncuk(b, kelSpan);
+}
+
+function konumBaloncuk(b, kelSpan){
+  b.style.left="-9999px"; b.classList.remove("ust");   // ölç
+  const bw = b.offsetWidth, bh = b.offsetHeight;
+  const r = kelSpan.getBoundingClientRect();
+  let sol = r.left + r.width/2 - bw/2;
+  sol = Math.max(8, Math.min(sol, window.innerWidth - bw - 8));
+  let ust = r.top - bh - 12;                            // varsayılan: kelimenin üstünde
+  if (ust < 8){ ust = r.bottom + 12; b.classList.add("ust"); } // yer yoksa altına
+  b.style.left = sol+"px"; b.style.top = ust+"px";
+  const okX = r.left + r.width/2 - sol - 8;
+  b.style.setProperty("--ok", Math.max(8, Math.min(okX, bw-24))+"px");
+}
+
+function baloncukKapat(){
+  $("#baloncuk").classList.add("gizli");
+  document.querySelectorAll(".kel.secili").forEach(k=>k.classList.remove("secili"));
+}
+
+// İlerleme kaydını güncelle (kısmi) + DB'ye yaz (biraz geciktirerek)
+function ilerlemeKaydet(yama){
+  Object.assign(Okuyucu.ilerleme, yama, { updatedAt: Date.now() });
+  clearTimeout(Okuyucu.bekleyenKayit);
+  const kayit = Object.assign({}, Okuyucu.ilerleme);
+  Okuyucu.bekleyenKayit = setTimeout(() => DB.koy("progress", kayit), 250);
+}
+
+function sayfaGit(delta){
+  const yeni = Okuyucu.sayfaIx + delta;
+  if (yeni < 0 || yeni >= Okuyucu.hikaye.pages.length) return;
+  Okuyucu.sayfaIx = yeni;
+  sayfaCiz();
+}
+
+function yerImiToggle(){
+  const sf = Okuyucu.hikaye.pages[Okuyucu.sayfaIx];
+  Okuyucu.ilerleme.bookmark = (Okuyucu.ilerleme.bookmark === sf.page) ? null : sf.page;
+  $("#yerImiBtn").classList.toggle("aktif", Okuyucu.ilerleme.bookmark === sf.page);
+  ilerlemeKaydet({});
+  toast(Okuyucu.ilerleme.bookmark ? "Yer imi konuldu 🔖" : "Yer imi kaldırıldı");
+}
+
+// son sayfadaki "Testi çöz" → test ekranı
+function testeGit(){
+  testBaslat(Okuyucu.hikaye, Okuyucu.ilerleme);
+}
+
+/* =====================================================================
+   TEST (quiz)
+   ===================================================================== */
+const Test = { hikaye:null, ilerleme:null, sorular:[], ix:0, dogru:0, yanlislar:[] };
+
+function testBaslat(hikaye, ilerleme){
+  Object.assign(Test, {
+    hikaye, ilerleme,
+    sorular: hikaye.quiz || [],
+    ix:0, dogru:0, yanlislar:[]
+  });
+  ekranGoster("Test", hikaye.title || "Test");
+  soruCiz();
+}
+
+function soruCiz(){
+  const s = Test.sorular[Test.ix];
+  const toplam = Test.sorular.length;
+  const yuzde = Math.round((Test.ix/toplam)*100);
+  const HARF = ["A","B","C","D","E"];
+  const kap = $("#ekranTest");
+  kap.innerHTML =
+    '<div class="test-ust"><div class="soru-sayac">Soru '+(Test.ix+1)+'/'+toplam+'</div>'+
+    '<div class="ilerleme-cubuk"><i style="width:'+yuzde+'%"></i></div></div>'+
+    '<div class="soru-kart"><div class="soru"></div></div>'+
+    '<div class="secenekler"></div>';
+  kap.querySelector(".soru").textContent = s.q || "";
+
+  const sc = kap.querySelector(".secenekler");
+  (s.options||[]).forEach((sec, i) => {
+    const b = olustur("button","secenek");
+    b.innerHTML = '<span class="harf">'+(HARF[i]||"?")+'</span><span class="metin"></span>';
+    b.querySelector(".metin").textContent = sec;
+    b.addEventListener("click", () => cevapVer(i, b), { once:true });
+    sc.appendChild(b);
+  });
+}
+
+function cevapVer(secilen, btn){
+  const s = Test.sorular[Test.ix];
+  const dogruIx = s.answer;
+  const butonlar = [...document.querySelectorAll("#ekranTest .secenek")];
+  butonlar.forEach(b => b.disabled = true);
+
+  butonlar[dogruIx] && butonlar[dogruIx].classList.add("dogru");
+  if (secilen === dogruIx){
+    Test.dogru++;
+    if (navigator.vibrate) navigator.vibrate(20);
+  } else {
+    btn.classList.add("yanlis");
+    Test.yanlislar.push({ soru:s.q, dogruMetin:(s.options||[])[dogruIx] });
+    if (navigator.vibrate) navigator.vibrate([15,40,15]);
+  }
+
+  // "Devam" / "Sonucu gör" butonu
+  const alt = olustur("div","test-butonlar");
+  const sonSoru = (Test.ix === Test.sorular.length-1);
+  const b = olustur("button","btn tam");
+  b.textContent = sonSoru ? "Sonucu gör" : "Devam ›";
+  b.addEventListener("click", () => {
+    if (sonSoru) testSonuc(); else { Test.ix++; soruCiz(); }
+  });
+  alt.appendChild(b);
+  $("#ekranTest").appendChild(alt);
+}
+
+async function testSonuc(){
+  const toplam = Test.sorular.length, dogru = Test.dogru;
+  const yuzde = Math.round((dogru/toplam)*100);
+  const mesaj = yuzde>=80 ? "Harika! 🎉" : yuzde>=50 ? "İyi gidiyorsun 👍" : "Tekrar çalış, olur bu 💪";
+
+  // sonucu kaydet
+  Test.ilerleme.quiz = { correct:dogru, total:toplam, yuzde,
+                         wrong:Test.yanlislar, tarih:Date.now() };
+  await DB.koy("progress", Object.assign({}, Test.ilerleme, {updatedAt:Date.now()}));
+
+  const kap = $("#ekranTest");
+  let html =
+    '<div class="test-sonuc"><div class="skor">'+dogru+'<small>/'+toplam+'</small></div>'+
+    '<div class="mesaj">'+mesaj+'</div></div>';
+  if (Test.yanlislar.length){
+    html += '<div class="yanlis-liste"><h4>Yanlış yaptığın sorular</h4>';
+    Test.yanlislar.forEach(y => {
+      html += '<div class="yanlis-oge"><div class="s"></div><div class="d"></div></div>';
+    });
+    html += '</div>';
+  }
+  html += '<div class="test-butonlar">'+
+          '<button class="btn ikincil" id="testTekrar">Tekrar dene</button>'+
+          '<button class="btn" id="testBitir">Kütüphaneye dön</button></div>';
+  kap.innerHTML = html;
+
+  // yanlış metinlerini güvenli doldur
+  const ogeler = kap.querySelectorAll(".yanlis-oge");
+  Test.yanlislar.forEach((y, i) => {
+    ogeler[i].querySelector(".s").textContent = y.soru;
+    ogeler[i].querySelector(".d").textContent = "Doğru cevap: " + y.dogruMetin;
+  });
+
+  $("#testTekrar").addEventListener("click", () => testBaslat(Test.hikaye, Test.ilerleme));
+  $("#testBitir").addEventListener("click", () => { ekranGoster("Kutuphane","Okuma"); kutuphaneCiz(); });
+}
+
+/* ---- Hikâye ekleme (.json yükle) ---- */
+async function hikayeYukle(dosya){
+  try{
+    const metin = await dosya.text();
+    const veri = JSON.parse(metin);
+    // Doğrulama
+    if (!veri.story_id || !Array.isArray(veri.pages))
+      throw new Error("Geçersiz hikâye: story_id ve pages gerekli.");
+    const varMi = await DB.getir("stories", veri.story_id);
+    await DB.koy("stories", veri);
+    if (!varMi) await DB.koy("progress", bosIlerleme(veri.story_id));
+    toast(varMi ? "Hikâye güncellendi" : "Hikâye eklendi ✓");
+    kutuphaneCiz();
+  }catch(err){
+    toast("Yükleme hatası: " + err.message);
+  }
+}
+
+/* =====================================================================
+   KELİME DURUMU + DEFTER  (0 bilmiyorum · 1 öğreniyorum · 2 biliyorum)
+   ===================================================================== */
+function kelimeAnahtar(lang, kelime){ return lang + "|" + sadelestir(kelime); }
+
+async function kelimeDurumAyarla(lang, hamKelime, durum, tr, note, ornek, story){
+  const anahtar = kelimeAnahtar(lang, hamKelime);
+  if (!anahtar.split("|")[1]) return;
+  let k = await DB.getir("kelimeler", anahtar);
+  if (!k) k = { anahtar, lang, kelime:sadelestir(hamKelime), durum, tr:tr||"", note:note||"",
+                ornekler:[], sayac:0, eklendi:Date.now() };
+  k.durum = durum;
+  if (tr && !k.tr) k.tr = tr;
+  if (note && !k.note) k.note = note;
+  if (ornek && !k.ornekler.some(o => o.cumle === ornek)){
+    k.ornekler.unshift({ cumle:ornek, story:(story&&story.title)||"" });
+    if (k.ornekler.length > 5) k.ornekler.length = 5;
+  }
+  k.sayac = (k.sayac||0) + 1;
+  k.updatedAt = Date.now();
+  await DB.koy("kelimeler", k);
+  Okuyucu.durumlar && Okuyucu.durumlar.set(k.kelime, durum);
+  return k;
+}
+
+// Okuyucu açılırken o dilin kelime durumlarını Map'e yükle
+async function durumlariYukle(lang){
+  const hepsi = await DB.hepsiniGetir("kelimeler");
+  const m = new Map();
+  hepsi.forEach(k => { if (k.lang === lang) m.set(k.kelime, k.durum); });
+  return m;
+}
+
+// Sayfadaki aynı kelimeleri anında yeniden renklendir
+function kelimeleriRenklendir(sadeKelime, durum){
+  document.querySelectorAll("#okumaMetin .kel").forEach(s => {
+    if (sadelestir(s.textContent) === sadeKelime){
+      s.classList.remove("d0","d1","d2");
+      if (durum===0||durum===1) s.classList.add("d"+durum);
+    }
+  });
+}
+
+/* =====================================================================
+   SESLİ OKUMA (TTS) — tarayıcının yerel sesi (çevrimdışı)
+   ===================================================================== */
+const Ses = { sesler:[], okuyor:false };
+
+function seslariHazirla(){
+  if (!("speechSynthesis" in window)) return;
+  Ses.sesler = speechSynthesis.getVoices() || [];
+  speechSynthesis.onvoiceschanged = () => { Ses.sesler = speechSynthesis.getVoices() || []; };
+}
+function sesBul(lang){
+  if (!Ses.sesler.length) Ses.sesler = ("speechSynthesis" in window) ? (speechSynthesis.getVoices()||[]) : [];
+  const l = (lang||"").toLowerCase();
+  const eslesen = Ses.sesler.filter(v => v.lang && v.lang.toLowerCase().startsWith(l));
+  return eslesen.find(v => v.localService) || eslesen[0] || null;
+}
+function sesVarMi(lang){ return !!sesBul(lang); }
+
+function konus(metin, lang, bitince){
+  if (!("speechSynthesis" in window)) { bitince && bitince(); return; }
+  const u = new SpeechSynthesisUtterance(metin);
+  const v = sesBul(lang);
+  if (v){ u.voice = v; u.lang = v.lang; } else { u.lang = lang; }
+  u.rate = 0.9;
+  if (bitince) u.onend = bitince;
+  speechSynthesis.speak(u);
+}
+
+// Okuyucuda sayfayı sırayla oku (cümle cümle vurgulayarak)
+function sayfaSesliOku(){
+  if (Ses.okuyor){ sesDurdur(); return; }
+  const lang = Okuyucu.srcKey;
+  if (!sesVarMi(lang)){ toast("Bu dil için cihazda ses yok"); return; }
+  const cumleler = [...document.querySelectorAll("#okumaMetin .cumle")];
+  Ses.okuyor = true; $("#okSesBtn").classList.add("aktif");
+  let i = 0;
+  const sonraki = () => {
+    if (!Ses.okuyor || i >= cumleler.length){ sesDurdur(); return; }
+    cumleler.forEach(c => c.classList.remove("okunuyor"));
+    const c = cumleler[i]; c.classList.add("okunuyor");
+    c.scrollIntoView({block:"center", behavior:"smooth"});
+    konus(c.textContent, lang, () => { i++; sonraki(); });
+  };
+  sonraki();
+}
+function sesDurdur(){
+  Ses.okuyor = false;
+  if ("speechSynthesis" in window) speechSynthesis.cancel();
+  document.querySelectorAll("#okumaMetin .cumle.okunuyor").forEach(c=>c.classList.remove("okunuyor"));
+  const b = $("#okSesBtn"); if (b) b.classList.remove("aktif");
+}
+
+/* =====================================================================
+   KELİMELERİM ekranı
+   ===================================================================== */
+let kelimeFiltre = "hepsi";
+async function kelimelerAc(){
+  ekranGoster("Kelimeler","📕 Kelimelerim");
+  kelimelerCiz();
+}
+async function kelimelerCiz(){
+  const hepsi = (await DB.hepsiniGetir("kelimeler"))
+    .sort((a,b)=> (b.updatedAt||0)-(a.updatedAt||0));
+  const suz = kelimeFiltre==="hepsi" ? hepsi : hepsi.filter(k => String(k.durum)===kelimeFiltre);
+  const liste = $("#kelimeListe"); liste.innerHTML = "";
+  if (!suz.length){
+    liste.innerHTML = '<div class="bos-durum"><div class="amblem">📕</div>'+
+      '<p>Bu bölümde kelime yok.<br>Okurken bir kelimeye dokunup <b>durum</b> ver.</p></div>';
+    return;
+  }
+  suz.forEach(k => {
+    const o = olustur("div","kelime-oge");
+    o.innerHTML =
+      '<span class="nokta d'+k.durum+'"></span>'+
+      '<div class="orta"><div class="kkelime"></div><div class="ktr"></div>'+
+        (k.ornekler&&k.ornekler[0] ? '<div class="kornek"></div>' : '')+'</div>'+
+      (sesVarMi(k.lang) ? '<button class="kses" title="Seslendir">🔊</button>' : '');
+    o.querySelector(".kkelime").textContent = dilBayrak(k.lang)+" "+k.kelime;
+    o.querySelector(".ktr").textContent = k.tr || "—";
+    if (k.ornekler&&k.ornekler[0]) o.querySelector(".kornek").textContent = "“"+k.ornekler[0].cumle+"”";
+    const sesBtn = o.querySelector(".kses");
+    if (sesBtn) sesBtn.addEventListener("click", () => konus(k.kelime, k.lang));
+    liste.appendChild(o);
+  });
+}
+function dilBayrak(kod){
+  const m = { it:"🇮🇹", en:"🇬🇧", tr:"🇹🇷", es:"🇪🇸", fr:"🇫🇷", de:"🇩🇪" };
+  return m[(kod||"").toLowerCase()] || "";
+}
+
+/* =====================================================================
+   İSTATİSTİK + SERİ (streak)
+   ===================================================================== */
+const Ist = { veri:null };
+function bugunAnahtar(){ return new Date().toISOString().slice(0,10); }
+
+async function istYukle(){
+  if (Ist.veri) return Ist.veri;
+  Ist.veri = (await DB.getir("istatistik","genel")) || { id:"genel", gunler:{}, toplam:0 };
+  return Ist.veri;
+}
+async function istEkle(kelimeSayisi){
+  const v = await istYukle();
+  const g = bugunAnahtar();
+  v.gunler[g] = (v.gunler[g]||0) + kelimeSayisi;
+  v.toplam = (v.toplam||0) + kelimeSayisi;
+  await DB.koy("istatistik", v);
+  hizliRozetGuncelle();
+}
+function seriHesapla(gunler){
+  let seri = 0;
+  const t = new Date(bugunAnahtar()+"T00:00:00");
+  // bugün aktif değilse dünden başla
+  const anah = (d)=> d.toISOString().slice(0,10);
+  if (!(gunler[anah(t)]>0)) t.setDate(t.getDate()-1);
+  while (gunler[anah(t)] > 0){ seri++; t.setDate(t.getDate()-1); }
+  return seri;
+}
+async function istatistikAc(){
+  ekranGoster("Istatistik","📊 İstatistik");
+  const v = await istYukle();
+  const g = bugunAnahtar();
+  $("#istSeri").textContent = seriHesapla(v.gunler);
+  $("#istBugun").textContent = v.gunler[g] || 0;
+  $("#istToplam").textContent = v.toplam || 0;
+  // son 7 gün grafiği
+  const gunAdi = ["Pz","Pt","Sa","Ça","Pe","Cu","Ct"];
+  const gunler = [];
+  const d = new Date(g+"T00:00:00");
+  for (let i=6;i>=0;i--){ const x=new Date(d); x.setDate(d.getDate()-i);
+    gunler.push({ anah:x.toISOString().slice(0,10), ad:gunAdi[x.getDay()] }); }
+  const enCok = Math.max(1, ...gunler.map(x => v.gunler[x.anah]||0));
+  const kap = $("#istCubuklar"); kap.innerHTML = "";
+  gunler.forEach(x => {
+    const deg = v.gunler[x.anah] || 0;
+    const el = olustur("div","gun");
+    el.innerHTML = '<div class="cdeg">'+(deg||"")+'</div>'+
+      '<div class="cbar" style="height:'+Math.round((deg/enCok)*100)+'%"></div>'+
+      '<div class="cgun">'+x.ad+'</div>';
+    kap.appendChild(el);
+  });
+}
+async function hizliRozetGuncelle(){
+  const [kelimeler, v] = await Promise.all([ DB.hepsiniGetir("kelimeler"), istYukle() ]);
+  const ks = $("#hizliKelimeSayi"); if (ks) ks.textContent = kelimeler.length;
+  const hs = $("#hizliSeri"); if (hs) hs.textContent = seriHesapla(v.gunler)+"🔥";
+}
+
+/* =====================================================================
+   5) AYARLAR — tema, font, yedekleme
+   ===================================================================== */
+async function disaAktar(){
+  const [stories, progress, kelimeler, istatistik] = await Promise.all([
+    DB.hepsiniGetir("stories"), DB.hepsiniGetir("progress"),
+    DB.hepsiniGetir("kelimeler"), DB.hepsiniGetir("istatistik")
+  ]);
+  const yedek = { tur:"italyanca-okuma-yedek", surum:2, tarih:new Date().toISOString(),
+                  stories, progress, kelimeler, istatistik };
+  const blob = new Blob([JSON.stringify(yedek,null,2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = olustur("a"); a.href = url;
+  a.download = "okuma-yedek.json";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  toast("Yedek indirildi");
+}
+
+async function iceAktar(dosya){
+  try{
+    const veri = JSON.parse(await dosya.text());
+    if (veri.tur !== "italyanca-okuma-yedek") throw new Error("Bu bir yedek dosyası değil.");
+    for (const s of (veri.stories||[])) await DB.koy("stories", s);
+    for (const p of (veri.progress||[])) await DB.koy("progress", p);
+    for (const k of (veri.kelimeler||[])) await DB.koy("kelimeler", k);
+    for (const i of (veri.istatistik||[])) await DB.koy("istatistik", i);
+    Ist.veri = null;   // önbelleği tazele
+    toast("Yedek geri yüklendi ✓");
+    kutuphaneCiz();
+  }catch(err){
+    toast("Geri yükleme hatası: " + err.message);
+  }
+}
+
+/* =====================================================================
+   6) OLAY BAĞLARI & AÇILIŞ
+   ===================================================================== */
+function olaylariBagla(){
+  $("#ekleBtn").addEventListener("click", () => $("#dosyaGiris").click());
+  $("#dosyaGiris").addEventListener("change", (e) => {
+    if (e.target.files[0]) hikayeYukle(e.target.files[0]);
+    e.target.value = "";
+  });
+
+  $("#ayarBtn").addEventListener("click", () => ekranGoster("Ayarlar","Ayarlar"));
+  $("#geriBtn").addEventListener("click", () => {
+    sesDurdur();
+    if (aktifEkran === "Ayarlar") ekranGoster(oncekiEkran, oncekiEkran==="Kutuphane"?"Okuma":"");
+    else { ekranGoster("Kutuphane","Okuma"); kutuphaneCiz(); hizliRozetGuncelle(); }
+  });
+
+  // Tema
+  $("#temaSecim").addEventListener("click", (e) => {
+    const b = e.target.closest("button"); if(!b) return;
+    Ayar.koy("tema", b.dataset.tema); temaUygula();
+  });
+  // Font
+  $("#fontBuyut").addEventListener("click", () => fontDegis(+2));
+  $("#fontKucult").addEventListener("click", () => fontDegis(-2));
+
+  // Okuyucu
+  $("#oncekiBtn").addEventListener("click", () => sayfaGit(-1));
+  $("#sonrakiBtn").addEventListener("click", () => {
+    const son = Okuyucu.sayfaIx === Okuyucu.hikaye.pages.length-1;
+    if (son && Okuyucu.hikaye.quiz && Okuyucu.hikaye.quiz.length) testeGit();
+    else sayfaGit(+1);
+  });
+  $("#yerImiBtn").addEventListener("click", yerImiToggle);
+  $("#okSesBtn").addEventListener("click", sayfaSesliOku);
+  $("#okFontBuyut").addEventListener("click", () => { fontDegis(+2); });
+  $("#okFontKucult").addEventListener("click", () => { fontDegis(-2); });
+
+  // Kelimelerim & İstatistik
+  $("#acKelimeler").addEventListener("click", kelimelerAc);
+  $("#acIstatistik").addEventListener("click", istatistikAc);
+  $("#durumSekme").addEventListener("click", (e) => {
+    const btn = e.target.closest("button"); if(!btn) return;
+    kelimeFiltre = btn.dataset.f;
+    $("#durumSekme").querySelectorAll("button").forEach(x=>x.classList.toggle("aktif", x===btn));
+    kelimelerCiz();
+  });
+  // baloncuğu dışarı dokununca kapat
+  document.addEventListener("pointerdown", (e) => {
+    if (aktifEkran!=="Okuyucu") return;
+    if (e.target.closest("#baloncuk") || e.target.closest(".kel")) return;
+    baloncukKapat();
+  });
+
+  // Yedekleme
+  $("#disaAktarBtn").addEventListener("click", disaAktar);
+  $("#iceAktarBtn").addEventListener("click", () => $("#yedekGiris").click());
+  $("#yedekGiris").addEventListener("change", (e) => {
+    if (e.target.files[0]) iceAktar(e.target.files[0]);
+    e.target.value = "";
+  });
+}
+
+function fontDegis(delta){
+  let px = parseInt(Ayar.al("font","22"),10) + delta;
+  px = Math.max(16, Math.min(34, px));
+  Ayar.koy("font", px); fontUygula();
+  toast("Yazı boyutu: "+px+"px");
+}
+
+function baslat(){
+  temaUygula(); fontUygula();
+  seslariHazirla();
+  olaylariBagla();
+  ekranGoster("Kutuphane","Okuma");
+  kutuphaneCiz();
+  hizliRozetGuncelle();
+}
+document.addEventListener("DOMContentLoaded", baslat);
+
+// Service Worker — çevrimdışı çalışma (https / localhost gerekir; file:// atlanır)
+if ("serviceWorker" in navigator){
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(()=>{ /* file:// veya destek yok — sorun değil */ });
+  });
+}
+</script>
+</body>
+</html>

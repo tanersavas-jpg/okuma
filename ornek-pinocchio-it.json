@@ -1,0 +1,49 @@
+{
+  "story_id": "pinocchio_01",
+  "title": "Pinocchio",
+  "level": "A1-A2",
+  "language": "it",
+  "pages": [
+    {
+      "page": 1,
+      "chapter": "Capitolo 1 — Il pezzo di legno",
+      "image_hint": "Un vecchio falegname con un pezzo di legno",
+      "sentences": [
+        "C'era una volta un pezzo di legno.",
+        "Non era un legno speciale, ma un semplice pezzo da camino.",
+        "Un giorno arrivò nella bottega di un vecchio falegname.",
+        "Il suo nome era Mastro Ciliegia."
+      ],
+      "vocab": [
+        {"it": "legno", "tr": "odun / tahta", "note": ""},
+        {"it": "falegname", "tr": "marangoz", "note": ""},
+        {"it": "bottega", "tr": "atölye / dükkân", "note": ""},
+        {"it": "vecchio", "tr": "yaşlı / eski", "note": ""},
+        {"it": "nome", "tr": "isim", "note": ""}
+      ]
+    },
+    {
+      "page": 2,
+      "chapter": "Capitolo 2 — Una voce misteriosa",
+      "image_hint": "Il falegname sorpreso sente una vocina",
+      "sentences": [
+        "Mastro Ciliegia prese l'ascia per tagliare il legno.",
+        "Ma una vocina disse: «Non picchiare così forte!»",
+        "Il falegname guardò intorno, ma non c'era nessuno.",
+        "Ebbe molta paura e cominciò a tremare."
+      ],
+      "vocab": [
+        {"it": "ascia", "tr": "balta", "note": ""},
+        {"it": "tagliare", "tr": "kesmek", "note": "fiil"},
+        {"it": "voce", "tr": "ses", "note": "vocina = küçük ses"},
+        {"it": "paura", "tr": "korku", "note": "avere paura = korkmak"},
+        {"it": "tremare", "tr": "titremek", "note": ""}
+      ]
+    }
+  ],
+  "quiz": [
+    {"q": "Che cos'è il protagonista all'inizio?", "options": ["Un bambino", "Un pezzo di legno", "Un gatto"], "answer": 1},
+    {"q": "Come si chiama il falegname?", "options": ["Geppetto", "Mastro Ciliegia", "Pinocchio"], "answer": 1},
+    {"q": "Che cosa sente il falegname?", "options": ["Una vocina", "Un cane", "La pioggia"], "answer": 0}
+  ]
+}
