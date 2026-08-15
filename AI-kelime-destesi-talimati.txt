@@ -1,0 +1,52 @@
+════════════════════════════════════════════════════════════════
+  OKUMA UYGULAMASI — YAPAY ZEKÂ "KELİME DESTESİ" TALİMATI
+  (Bu metni + kendi kelime listeni claude.ai'ye ver. Çıkan JSON'u
+   kopyala, uygulamada "＋ AI'dan hikâye ekle" → "Panodan yapıştır"
+   → "Ekle" ile yükle. Deste, "🎯 Alıştırma" bölümünde çıkar.)
+════════════════════════════════════════════════════════════════
+
+Aşağıdaki kelime/fiil listesinden, [DİL: İtalyanca] öğrenen biri için
+bir "kelime destesi" hazırla. Anlamları [ANLAM DİLİ: İngilizce] yaz.
+
+Bana SADECE aşağıdaki yapıda geçerli bir JSON ver — başka açıklama yazma.
+
+Kurallar:
+- "language": İtalyanca için "it", İngilizce için "en".
+- Her kelime bir "entry" olur:
+    - "term": öğrenilecek yabancı kelime (fiillerde MASTAR).
+    - "meaning": anlamı (İngilizce; birden çok karşılık varsa "/" ile:
+      örn. "to put / to place").
+    - İstersen "sentence" (yabancı örnek cümle) + "sentence_meaning" (İngilizcesi).
+- FİİLLERDE ayrıca "verb": true ve "coniug" ekle: ŞİMDİKİ ZAMAN
+  6 kişide çekim. Her kişi için {form, sentence, sentence_meaning}:
+    io, tu, lui, noi, voi, loro.
+  "sentence" cümlesi o çekimi ("form") İÇİNDE geçmeli (uygulama
+  cümlede o kelimenin yerini boşluk yapıp sorar).
+- "deck_id": küçük harf, boşluksuz, benzersiz (örn. "mutfak_01").
+
+ŞEMA:
+{
+  "deck_id": "mutfak_01",
+  "title": "Mutfak",
+  "language": "it",
+  "entries": [
+    { "term": "riso", "meaning": "rice",
+      "sentence": "Mangio il riso.", "sentence_meaning": "I eat rice." },
+
+    { "term": "mettere", "meaning": "to put", "verb": true,
+      "coniug": {
+        "io":   {"form":"metto",   "sentence":"Io metto il libro sul tavolo.", "sentence_meaning":"I put the book on the table."},
+        "tu":   {"form":"metti",   "sentence":"Tu metti i piatti a posto.",    "sentence_meaning":"You put the dishes away."},
+        "lui":  {"form":"mette",   "sentence":"Lui mette la giacca.",          "sentence_meaning":"He puts on the jacket."},
+        "noi":  {"form":"mettiamo","sentence":"Noi mettiamo la musica.",       "sentence_meaning":"We put on the music."},
+        "voi":  {"form":"mettete", "sentence":"Voi mettete le scarpe.",        "sentence_meaning":"You put on the shoes."},
+        "loro": {"form":"mettono", "sentence":"Loro mettono i soldi in banca.","sentence_meaning":"They put the money in the bank."}
+      }
+    }
+  ]
+}
+
+İŞTE KELİMELERİM (bunlardan desteyi üret):
+[BURAYA KELİMELERİNİ YAPIŞTIR — örn:
+ questo, riso, lavastoviglie, asciugare (fiil), mettere (fiil) ...]
+════════════════════════════════════════════════════════════════

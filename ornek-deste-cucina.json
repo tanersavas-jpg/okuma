@@ -1,0 +1,29 @@
+{
+  "deck_id": "cucina_01",
+  "title": "Cucina — mutfak",
+  "language": "it",
+  "answer_lang": "en",
+  "entries": [
+    {"term": "questo", "meaning": "this", "sentence": "Questo è buono.", "sentence_meaning": "This is good."},
+    {"term": "riso", "meaning": "rice", "sentence": "Mangio il riso.", "sentence_meaning": "I eat rice."},
+    {"term": "lavastoviglie", "meaning": "dishwasher", "sentence": "La lavastoviglie è piena.", "sentence_meaning": "The dishwasher is full."},
+    {"term": "asciugare", "meaning": "to dry", "verb": true,
+      "coniug": {
+        "io":   {"form": "asciugo",     "sentence": "Io asciugo i piatti.",         "sentence_meaning": "I dry the dishes."},
+        "tu":   {"form": "asciughi",    "sentence": "Tu asciughi le mani.",         "sentence_meaning": "You dry your hands."},
+        "lui":  {"form": "asciuga",     "sentence": "Lui asciuga i capelli.",       "sentence_meaning": "He dries his hair."},
+        "noi":  {"form": "asciughiamo", "sentence": "Noi asciughiamo i vestiti.",   "sentence_meaning": "We dry the clothes."},
+        "voi":  {"form": "asciugate",   "sentence": "Voi asciugate il pavimento.",  "sentence_meaning": "You dry the floor."},
+        "loro": {"form": "asciugano",   "sentence": "Loro asciugano i piatti.",     "sentence_meaning": "They dry the dishes."}
+      }},
+    {"term": "mettere", "meaning": "to put", "verb": true,
+      "coniug": {
+        "io":   {"form": "metto",    "sentence": "Io metto il libro sul tavolo.",            "sentence_meaning": "I put the book on the table."},
+        "tu":   {"form": "metti",    "sentence": "Tu metti i piatti nella lavastoviglie.",   "sentence_meaning": "You put the dishes in the dishwasher."},
+        "lui":  {"form": "mette",    "sentence": "Lui mette la giacca.",                     "sentence_meaning": "He puts on the jacket."},
+        "noi":  {"form": "mettiamo", "sentence": "Noi mettiamo la musica.",                  "sentence_meaning": "We put on the music."},
+        "voi":  {"form": "mettete",  "sentence": "Voi mettete le scarpe.",                   "sentence_meaning": "You put on the shoes."},
+        "loro": {"form": "mettono",  "sentence": "Loro mettono i soldi in banca.",           "sentence_meaning": "They put the money in the bank."}
+      }}
+  ]
+}

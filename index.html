@@ -282,6 +282,56 @@ body{
 .test-butonlar{display:flex; gap:12px; margin-top:16px}
 .test-butonlar .btn{flex:1}
 
+/* ===================== KELİME ÇALIŞMASI ===================== */
+.deste-kart{background:var(--kagit-2); border:1px solid var(--cizgi); border-radius:16px;
+  padding:16px 16px 16px 46px; margin-bottom:14px; box-shadow:var(--golge); position:relative; cursor:pointer}
+.deste-kart h3{margin:0 0 8px; font-size:20px}
+.deste-kart .yuzde{font-size:13px; color:var(--metin-2); margin-top:6px}
+.deste-kart .sil{position:absolute; top:12px; left:10px; background:none; border:none;
+  font-size:20px; color:var(--metin-2); opacity:.6; cursor:pointer; padding:6px}
+
+.cal-baslik{text-align:center; padding:26px 12px 10px}
+.cal-baslik h2{font-size:26px; margin:0 0 6px}
+.cal-baslik .alt{color:var(--metin-2); font-size:15px; margin-bottom:18px}
+.cal-baslik .btn{margin-bottom:12px}
+
+.cal-ust{margin:6px 2px 16px}
+.cal-ust .ilerleme-cubuk{margin-top:8px}
+.cal-ust .bilgi{display:flex; justify-content:space-between; font-size:14px; color:var(--metin-2); font-weight:600}
+
+.cal-soru{background:var(--kagit-2); border:1px solid var(--cizgi); border-radius:18px;
+  padding:26px 20px; text-align:center; box-shadow:var(--golge); margin-bottom:18px}
+.cal-soru .etiket{font-size:13px; color:var(--metin-2); margin-bottom:12px; font-weight:600; letter-spacing:.3px}
+.cal-soru .buyukkelime{font-size:34px; font-weight:800; font-family:Georgia,serif; line-height:1.2}
+.cal-cumle{font-size:23px; line-height:1.7; font-family:Georgia,serif}
+.cal-cumle .bosluk{display:inline-block; min-width:74px; border-bottom:3px solid var(--yesil); margin:0 3px; vertical-align:baseline}
+.cal-soru .ipuc{font-size:14px; color:var(--metin-2); margin-top:12px}
+.cal-soru .ses{margin-top:16px; background:var(--yesil); color:#fff; border:none; border-radius:12px;
+  padding:10px 20px; font-size:16px; font-weight:600; cursor:pointer}
+
+.cal-giris{display:flex; gap:10px}
+.cal-giris input{flex:1; padding:16px; border:2px solid var(--cizgi); border-radius:14px;
+  font-size:19px; background:var(--kagit); color:var(--metin)}
+.cal-giris button{padding:0 22px; border:none; border-radius:14px; background:var(--yesil);
+  color:#fff; font-size:17px; font-weight:700; cursor:pointer}
+
+.cal-geri{margin-top:16px; padding:16px; border-radius:14px; font-size:16px; font-weight:600; text-align:center; line-height:1.5}
+.cal-geri.dogru{background:#e9f6ec; color:var(--dogru); border:1px solid var(--dogru)}
+.cal-geri.yanlis{background:#fbeae6; color:var(--yanlis); border:1px solid var(--yanlis)}
+:root[data-tema="koyu"] .cal-geri.dogru{background:#233528}
+:root[data-tema="koyu"] .cal-geri.yanlis{background:#3a2420}
+.cal-geri .kelses{background:none; border:none; font-size:22px; cursor:pointer; vertical-align:middle}
+
+/* eşleştirme oyunu */
+.eslestir{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.eslestir button{padding:16px 10px; border:2px solid var(--cizgi); border-radius:14px;
+  background:var(--kagit-2); color:var(--metin); font-size:17px; cursor:pointer; min-height:64px; font-weight:600}
+.eslestir button.sec{border-color:var(--yesil); background:var(--yesil-acik)}
+.eslestir button.dogru{border-color:var(--dogru); background:#e9f6ec; opacity:.45; pointer-events:none}
+:root[data-tema="koyu"] .eslestir button.dogru{background:#233528}
+.eslestir button.yanlis{border-color:var(--yanlis); background:#fbeae6}
+:root[data-tema="koyu"] .eslestir button.yanlis{background:#3a2420}
+
 /* ===================== YAPIŞTIR ===================== */
 .yapistir-adim{background:var(--kagit-2); border:1px solid var(--cizgi); border-radius:14px;
   padding:16px; margin:8px 2px 14px; font-size:15px; line-height:1.9}
@@ -329,6 +379,7 @@ body{
 <!-- ============ KÜTÜPHANE EKRANI ============ -->
 <main class="ekran" id="ekranKutuphane">
   <div class="hizli">
+    <button id="acCalisma"><b id="hizliDesteSayi">0</b>🎯 Alıştırma</button>
     <button id="acKelimeler"><b id="hizliKelimeSayi">0</b>📕 Kelimelerim</button>
     <button id="acIstatistik"><b id="hizliSeri">0🔥</b>📊 İstatistik</button>
   </div>
@@ -372,6 +423,14 @@ body{
 <main class="ekran gizli" id="ekranTest">
   <p style="color:var(--metin-2)">Test ekranı Adım 3'te gelecek.</p>
 </main>
+
+<!-- ============ DESTELER (kelime çalışması listesi) ============ -->
+<main class="ekran gizli" id="ekranDesteler">
+  <div id="desteListe"></div>
+</main>
+
+<!-- ============ ALIŞTIRMA (çalışma motoru) ============ -->
+<main class="ekran gizli" id="ekranCalisma"></main>
 
 <!-- ============ YAPIŞTIR EKRANI ============ -->
 <main class="ekran gizli" id="ekranYapistir">
@@ -463,7 +522,7 @@ body{
                                         quiz:{correct,total,wrong[]}, updatedAt }
    ===================================================================== */
 const DB = (() => {
-  const AD = "italyanca-okuma", SURUM = 2;
+  const AD = "italyanca-okuma", SURUM = 3;
   let _db = null;
 
   function ac(){
@@ -481,6 +540,11 @@ const DB = (() => {
           db.createObjectStore("kelimeler", { keyPath: "anahtar" });
         if (!db.objectStoreNames.contains("istatistik"))
           db.createObjectStore("istatistik", { keyPath: "id" });
+        // v3: kelime çalışması desteleri + ustalık ilerlemesi
+        if (!db.objectStoreNames.contains("desteler"))
+          db.createObjectStore("desteler", { keyPath: "deck_id" });
+        if (!db.objectStoreNames.contains("deste_ilerleme"))
+          db.createObjectStore("deste_ilerleme", { keyPath: "deck_id" });
       };
       istek.onsuccess = () => { _db = istek.result; coz(_db); };
       istek.onerror   = () => hata(istek.error);
@@ -589,7 +653,7 @@ function fontUygula(){
 /* =====================================================================
    3) YÖNLENDİRME (basit ekran değiştirme)
    ===================================================================== */
-const EKRANLAR = ["Kutuphane","Okuyucu","Test","Yapistir","Kelimeler","Istatistik","Ayarlar"];
+const EKRANLAR = ["Kutuphane","Okuyucu","Test","Desteler","Calisma","Yapistir","Kelimeler","Istatistik","Ayarlar"];
 let aktifEkran = "Kutuphane";
 let oncekiEkran = "Kutuphane";
 
@@ -1034,6 +1098,30 @@ async function hikayeKaydet(veri){
   return varMi;
 }
 
+// Kelime çalışması destesini kaydet
+async function desteKaydet(veri){
+  if (!veri || !veri.deck_id || !Array.isArray(veri.entries))
+    throw new Error("Geçersiz deste (deck_id ve entries gerekli).");
+  await DB.koy("desteler", veri);
+  return true;
+}
+
+// Bir JSON öğesini türüne göre kaydet → {tur:'hikaye'|'deste'}
+async function iceriktenKaydet(veri){
+  if (veri && Array.isArray(veri.entries)) { await desteKaydet(veri); return "deste"; }
+  if (veri && Array.isArray(veri.pages))   { await hikayeKaydet(veri); return "hikaye"; }
+  throw new Error("Tanınmayan içerik (hikâye için 'pages', deste için 'entries' olmalı).");
+}
+
+async function kayitlariEkle(kayitlar){
+  let h=0, d=0;
+  for (const k of kayitlar){ const t = await iceriktenKaydet(k); if (t==="deste") d++; else h++; }
+  const parca = [];
+  if (h) parca.push(h+" hikâye");
+  if (d) parca.push(d+" deste");
+  return (parca.join(" · ") || "İçerik") + " eklendi ✓";
+}
+
 // AI çıktısındaki ```json ... ``` çitini ve fazlalığı temizle → JSON metni
 function jsonAyikla(metin){
   let t = (metin||"").trim();
@@ -1045,24 +1133,22 @@ function jsonAyikla(metin){
   return t;
 }
 
-// Dosyadan (.json) yükle
+// Dosyadan (.json) yükle — hikâye VEYA deste
 async function hikayeYukle(dosya){
   try{
     const veri = JSON.parse(await dosya.text());
     const kayitlar = Array.isArray(veri) ? veri : [veri];
-    let n=0; for (const h of kayitlar){ await hikayeKaydet(h); n++; }
-    toast(n>1 ? (n+" hikâye eklendi ✓") : "Hikâye eklendi ✓");
+    toast(await kayitlariEkle(kayitlar));
     kutuphaneCiz();
   }catch(err){ toast("Yükleme hatası: " + err.message); }
 }
 
-// Yapıştırılan metinden yükle (AI çıktısı)
+// Yapıştırılan metinden yükle (AI çıktısı) — hikâye VEYA deste
 async function metindenYukle(metin){
   try{
     const veri = JSON.parse(jsonAyikla(metin));
     const kayitlar = Array.isArray(veri) ? veri : [veri];
-    let n=0; for (const h of kayitlar){ await hikayeKaydet(h); n++; }
-    toast(n>1 ? (n+" hikâye eklendi ✓") : "Hikâye eklendi ✓");
+    toast(await kayitlariEkle(kayitlar));
     ekranGoster("Kutuphane","Okuma"); kutuphaneCiz();
   }catch(err){ toast("Metin hatası: " + err.message); }
 }
@@ -1253,10 +1339,368 @@ async function istatistikAc(){
   });
 }
 async function hizliRozetGuncelle(){
-  const [kelimeler, v] = await Promise.all([ DB.hepsiniGetir("kelimeler"), istYukle() ]);
+  const [kelimeler, v, desteler] = await Promise.all([
+    DB.hepsiniGetir("kelimeler"), istYukle(), DB.hepsiniGetir("desteler") ]);
   const ks = $("#hizliKelimeSayi"); if (ks) ks.textContent = kelimeler.length;
   const hs = $("#hizliSeri"); if (hs) hs.textContent = seriHesapla(v.gunler)+"🔥";
+  const ds = $("#hizliDesteSayi"); if (ds) ds.textContent = desteler.length;
 }
+
+/* =====================================================================
+   KELİME ÇALIŞMASI — desteler + öğrenme motoru
+   Öğe türleri:  w:term (kelime anlamı) · vm:term (fiil anlamı) · vc:term:kişi (çekim)
+   Ustalık: her öğe HEDEF kez doğru bilinince "öğrenildi".
+   ===================================================================== */
+const USTALIK_HEDEF = 2;
+const Calisma = { deste:null, ilerleme:null, birimler:[], kuyruk:[], aktif:null,
+                  mod:"karisik", dogru:0, soru:0, yanlisKume:null };
+
+function karistir(dizi){ const a=dizi.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+const KISI_TR = { io:"ben", tu:"sen", lui:"o", lei:"o", "lui/lei":"o", noi:"biz", voi:"siz", loro:"onlar" };
+const KISI_IT = { io:"io", tu:"tu", lui:"lui/lei", lei:"lui/lei", "lui/lei":"lui/lei", noi:"noi", voi:"voi", loro:"loro" };
+
+function reEscape(s){ return (s||"").replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+function yanitNormalize(s){
+  return (s||"").toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu,"")
+    .replace(/^(to |il |lo |la |le |gli |i |un |una |el )/,"")
+    .replace(/[^\p{L}\p{N} ]/gu,"").replace(/\s+/g," ").trim();
+}
+// Doğru cevabı "/", "," veya ";" ile ayrılmış seçeneklere böl
+function yanitSecenekleri(dogru){
+  return String(dogru||"").split(/[\/,;]| veya /i).map(x=>x.trim()).filter(Boolean);
+}
+function yanitDogruMu(verilen, dogru){
+  const v = yanitNormalize(verilen);
+  if (!v) return false;
+  return yanitSecenekleri(dogru).some(alt => yanitNormalize(alt) === v);
+}
+
+// Desteyi öğrenilebilir birimlere ayır
+function desteBirimleri(d){
+  const items = [];
+  (d.entries||[]).forEach(e => {
+    const cek = (e.coniug && typeof e.coniug==="object") ? e.coniug : null;
+    if (cek){
+      items.push({ key:"vm:"+e.term, tip:"anlam", term:e.term, meaning:e.meaning||"",
+                   sentence:e.sentence||"", entry:e });
+      Object.keys(cek).forEach(kisi => {
+        const c = cek[kisi];
+        if (c && c.form) items.push({ key:"vc:"+e.term+":"+kisi, tip:"cekim", term:e.term, kisi,
+          form:c.form, sentence:c.sentence||"", sentence_meaning:c.sentence_meaning||"", entry:e });
+      });
+    } else {
+      items.push({ key:"w:"+e.term, tip:"anlam", term:e.term, meaning:e.meaning||"",
+                   sentence:e.sentence||"", sentence_meaning:e.sentence_meaning||"", entry:e });
+    }
+  });
+  return items;
+}
+
+/* --- Deste listesi ekranı --- */
+async function calismaAc(){ ekranGoster("Desteler","🎯 Kelime çalışması"); desteListeCiz(); }
+async function desteListeCiz(){
+  const [desteler, ilerlemeler] = await Promise.all([
+    DB.hepsiniGetir("desteler"), DB.hepsiniGetir("deste_ilerleme") ]);
+  const im = {}; ilerlemeler.forEach(p=>im[p.deck_id]=p);
+  const liste = $("#desteListe"); liste.innerHTML = "";
+  if (!desteler.length){
+    liste.innerHTML = '<div class="bos-durum"><div class="amblem">🎯</div>'+
+      '<p>Henüz çalışma destesi yok.<br>Kütüphanedeki <b>“＋ AI\'dan hikâye ekle”</b> ile '+
+      'bir <b>kelime destesi</b> de yapıştırabilirsin.</p></div>';
+    return;
+  }
+  desteler.forEach(d => {
+    const birimler = desteBirimleri(d);
+    const toplam = birimler.length || 1;
+    const p = im[d.deck_id];
+    const ustalasan = p ? birimler.filter(b => (p.ustalik[b.key]||0) >= USTALIK_HEDEF).length : 0;
+    const yuzde = Math.round((ustalasan/toplam)*100);
+    const kart = olustur("div","deste-kart");
+    kart.innerHTML =
+      '<button class="sil" title="Sil">🗑</button>'+
+      '<h3></h3>'+
+      '<div class="rozetler"><span class="rozet"></span><span class="rozet"></span>'+
+        (yuzde>=100?'<span class="rozet skor">✓ öğrenildi</span>':'')+'</div>'+
+      '<div class="ilerleme-cubuk"><i style="width:'+yuzde+'%"></i></div>'+
+      '<div class="yuzde">%'+yuzde+' öğrenildi · '+ustalasan+'/'+toplam+' öğe</div>';
+    kart.querySelector("h3").textContent = d.title || "(başlıksız deste)";
+    const roz = kart.querySelectorAll(".rozet");
+    roz[0].textContent = dilEtiket(d.language);
+    roz[1].textContent = (d.entries||[]).length + " kelime";
+    kart.addEventListener("click", () => desteBaslatEkran(d.deck_id));
+    kart.querySelector(".sil").addEventListener("click", (e)=>{ e.stopPropagation(); desteSil(d); });
+    liste.appendChild(kart);
+  });
+}
+async function desteSil(d){
+  if (!confirm('“'+(d.title||d.deck_id)+'” destesi silinsin mi?')) return;
+  await DB.sil("desteler", d.deck_id);
+  await DB.sil("deste_ilerleme", d.deck_id);
+  toast("Silindi"); desteListeCiz(); hizliRozetGuncelle();
+}
+
+/* --- Deste açılış ekranı (mod seçimi) --- */
+async function desteBaslatEkran(deck_id){
+  const [d, p] = await Promise.all([ DB.getir("desteler",deck_id), DB.getir("deste_ilerleme",deck_id) ]);
+  if (!d) return;
+  Calisma.deste = d;
+  Calisma.ilerleme = p || { deck_id, ustalik:{}, updatedAt:Date.now() };
+  Calisma.birimler = desteBirimleri(d);
+  const toplam = Calisma.birimler.length;
+  const ustalasan = Calisma.birimler.filter(b => (Calisma.ilerleme.ustalik[b.key]||0)>=USTALIK_HEDEF).length;
+  const kaldi = toplam - ustalasan;
+  ekranGoster("Calisma", d.title || "Alıştırma");
+  const kap = $("#ekranCalisma");
+  kap.innerHTML =
+    '<div class="cal-baslik"><h2></h2>'+
+    '<div class="alt">'+ustalasan+'/'+toplam+' öğe öğrenildi · '+kaldi+' kaldı</div>'+
+    '<button class="btn tam" id="calBasla">▶ '+(kaldi?'Çalışmaya başla':'Tekrar çalış')+'</button>'+
+    '<button class="btn ikincil tam" id="calEslestir">🔗 Eşleştirme oyunu</button>'+
+    (ustalasan? '<button class="btn ikincil tam" id="calSifirla" style="margin-top:4px">↺ İlerlemeyi sıfırla</button>':'')+
+    '</div>';
+  kap.querySelector("h2").textContent = d.title || "Alıştırma";
+  $("#calBasla").addEventListener("click", () => calismaBaslat("karisik"));
+  $("#calEslestir").addEventListener("click", () => eslestirBaslat());
+  const sf = $("#calSifirla");
+  if (sf) sf.addEventListener("click", async () => {
+    if (!confirm("Bu destenin öğrenme ilerlemesi sıfırlansın mı?")) return;
+    Calisma.ilerleme = { deck_id, ustalik:{}, updatedAt:Date.now() };
+    await DB.koy("deste_ilerleme", Calisma.ilerleme);
+    desteBaslatEkran(deck_id);
+  });
+}
+
+/* --- Çalışma (karışık: anlam + çekim, seçenekli/yazarak dönüşümlü) --- */
+function calismaBaslat(mod){
+  Calisma.mod = mod;
+  Calisma.dogru = 0; Calisma.soru = 0;
+  const u = Calisma.ilerleme.ustalik;
+  Calisma.kuyruk = karistir(Calisma.birimler.filter(b => (u[b.key]||0) < USTALIK_HEDEF));
+  if (!Calisma.kuyruk.length){ calismaBitti(); return; }
+  soruSor();
+}
+
+function soruSor(){
+  if (!Calisma.kuyruk.length){ calismaBitti(); return; }
+  const item = Calisma.kuyruk.shift();
+  Calisma.aktif = item;
+  Calisma.soru++;
+  const secenekli = (Calisma.soru % 2 === 1);   // dönüşümlü: tek soru seçenekli, çift yazarak
+  const kap = $("#ekranCalisma");
+
+  // ilerleme başlığı
+  const toplam = Calisma.birimler.length;
+  const ustalasan = Calisma.birimler.filter(b => (Calisma.ilerleme.ustalik[b.key]||0)>=USTALIK_HEDEF).length;
+  let html = '<div class="cal-ust"><div class="bilgi"><span>Öğrenilen: '+ustalasan+'/'+toplam+'</span>'+
+             '<span>Sırada: '+Calisma.kuyruk.length+'</span></div>'+
+             '<div class="ilerleme-cubuk"><i style="width:'+Math.round((ustalasan/toplam)*100)+'%"></i></div></div>';
+
+  if (item.tip === "cekim"){
+    // mastar öncelikli: mastar büyük + kişi; cümle küçük ipucu
+    const kisiIt = KISI_IT[item.kisi] || item.kisi;
+    const kisiTr = KISI_TR[item.kisi] || item.kisi;
+    const ipuc = item.sentence ? '<div class="ipuc">'+cekimBosluk(item.sentence, item.form)+'</div>' : '';
+    html += '<div class="cal-soru"><div class="etiket">ÇEKİMLE → <b>'+kisiIt+'</b> ('+kisiTr+')</div>'+
+            '<div class="buyukkelime">'+kacKa(item.term)+'</div>'+
+            '<button class="ses" id="calSes">🔊 Dinle</button>'+ ipuc +'</div>';
+  } else {
+    html += '<div class="cal-soru"><div class="etiket">ANLAMI?</div>'+
+            '<div class="buyukkelime">'+kacKa(item.term)+'</div>'+
+            '<button class="ses" id="calSes">🔊 Dinle</button></div>';
+  }
+  html += '<div id="calGiris"></div>';
+  kap.innerHTML = html;
+
+  const ss = $("#calSes");
+  if (ss) ss.addEventListener("click", () => konus(item.term, Calisma.deste.language));
+
+  const dogruCevap = (item.tip==="cekim") ? item.form : item.meaning;
+  if (secenekli) secenekliGiris(item, dogruCevap);
+  else yazarakGiris(item, dogruCevap);
+}
+
+function cekimBosluk(sentence, form){
+  if (!sentence) return '<span class="bosluk"></span>';
+  const re = new RegExp(reEscape(form), "i");
+  if (re.test(sentence)) return kacKa(sentence).replace(new RegExp(reEscape(kacKa(form)),"i"),'<span class="bosluk"></span>');
+  return kacKa(sentence) + ' <span class="bosluk"></span>';
+}
+function kacKa(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+function secenekAdaylari(item){
+  if (item.tip === "cekim"){
+    const cek = item.entry.coniug || {};
+    let list = Object.keys(cek).map(k=>cek[k]&&cek[k].form).filter(f=>f && f!==item.form);
+    list = [...new Set(list)];
+    // yetmezse diğer fiillerin formlarından ekle
+    if (list.length < 3){
+      Calisma.birimler.filter(b=>b.tip==="cekim" && b.form!==item.form).forEach(b=>list.push(b.form));
+      list = [...new Set(list)];
+    }
+    return karistir(list).slice(0,3).concat(item.form);
+  } else {
+    let list = Calisma.birimler.filter(b=>b.tip==="anlam" && b.meaning && b.meaning!==item.meaning)
+                 .map(b=>b.meaning);
+    list = [...new Set(list)];
+    return karistir(list).slice(0,3).concat(item.meaning);
+  }
+}
+
+function secenekliGiris(item, dogruCevap){
+  const kap = $("#calGiris");
+  const secenekler = karistir(secenekAdaylari(item));
+  const box = olustur("div","secenekler");
+  secenekler.forEach(sec => {
+    const b = olustur("button","secenek");
+    b.innerHTML = '<span class="metin"></span>';
+    b.querySelector(".metin").textContent = sec;
+    b.addEventListener("click", () => {
+      const dogruMu = (sec === dogruCevap);
+      [...box.children].forEach(x=>x.disabled=true);
+      box.querySelectorAll(".secenek").forEach(x=>{
+        if (x.querySelector(".metin").textContent === dogruCevap) x.classList.add("dogru");
+      });
+      if (!dogruMu) b.classList.add("yanlis");
+      cevaplandi(dogruMu, item, dogruCevap);
+    }, { once:true });
+    box.appendChild(b);
+  });
+  kap.appendChild(box);
+}
+
+function yazarakGiris(item, dogruCevap){
+  const kap = $("#calGiris");
+  const g = olustur("div","cal-giris");
+  g.innerHTML = '<input type="text" id="calInput" autocomplete="off" autocapitalize="off" '+
+    'autocorrect="off" spellcheck="false" placeholder="'+
+    (item.tip==="cekim"?'çekimi yaz…':'anlamını yaz…')+'"><button id="calGonder">✓</button>';
+  kap.appendChild(g);
+  const inp = g.querySelector("#calInput");
+  const gonder = () => {
+    if (inp.disabled) return;
+    const dogruMu = yanitDogruMu(inp.value, dogruCevap);
+    inp.disabled = true; g.querySelector("#calGonder").disabled = true;
+    cevaplandi(dogruMu, item, dogruCevap);
+  };
+  g.querySelector("#calGonder").addEventListener("click", gonder);
+  inp.addEventListener("keydown", e => { if (e.key==="Enter") gonder(); });
+  setTimeout(()=>inp.focus(), 50);
+}
+
+async function cevaplandi(dogruMu, item, dogruCevap){
+  const u = Calisma.ilerleme.ustalik;
+  if (dogruMu){
+    Calisma.dogru++;
+    u[item.key] = Math.min(USTALIK_HEDEF, (u[item.key]||0)+1);
+    if (navigator.vibrate) navigator.vibrate(15);
+    if ((u[item.key]||0) < USTALIK_HEDEF) Calisma.kuyruk.push(item);   // pekişene kadar tekrar
+  } else {
+    u[item.key] = 0;
+    Calisma.kuyruk.push(item);                                          // yanlışı sona ekle
+    if (navigator.vibrate) navigator.vibrate([15,40,15]);
+  }
+  Calisma.ilerleme.updatedAt = Date.now();
+  DB.koy("deste_ilerleme", Object.assign({}, Calisma.ilerleme));
+  istEkle(1);   // her çözülen soru istatistiğe
+
+  // geri bildirim + örnek cümle + devam
+  const kap = $("#ekranCalisma");
+  const geri = olustur("div", "cal-geri " + (dogruMu?"dogru":"yanlis"));
+  let ic = dogruMu ? "✓ Doğru" : ("✗ Doğrusu: <b>"+kacKa(dogruCevap)+"</b>");
+  const ornek = (item.tip==="cekim") ? item.sentence : item.sentence;
+  if (ornek){
+    ic += '<br><span style="font-family:Georgia,serif">'+kacKa(ornek)+'</span>'+
+          ' <button class="kelses" title="Dinle">🔊</button>';
+  }
+  geri.innerHTML = ic;
+  kap.appendChild(geri);
+  const ks = geri.querySelector(".kelses");
+  if (ks) ks.addEventListener("click", ()=>konus(ornek, Calisma.deste.language));
+
+  const devam = olustur("button","btn tam cal-devam");
+  devam.textContent = Calisma.kuyruk.length ? "Devam ›" : "Bitir";
+  devam.addEventListener("click", soruSor);
+  kap.appendChild(devam);
+}
+
+async function calismaBitti(){
+  const toplam = Calisma.birimler.length;
+  const ustalasan = Calisma.birimler.filter(b => (Calisma.ilerleme.ustalik[b.key]||0)>=USTALIK_HEDEF).length;
+  const bitti = (ustalasan >= toplam);
+  const kap = $("#ekranCalisma");
+  kap.innerHTML =
+    '<div class="test-sonuc"><div class="skor">'+ustalasan+'<small>/'+toplam+'</small></div>'+
+    '<div class="mesaj">'+(bitti?"Bu desteyi öğrendin! 🎉":"Güzel gidiyor 👍 Kalanları da çalış.")+'</div></div>'+
+    '<div class="test-butonlar">'+
+    '<button class="btn ikincil" id="calGeriBtn">Destelere dön</button>'+
+    (bitti?'':'<button class="btn" id="calDevamBtn">Devam et</button>')+'</div>';
+  $("#calGeriBtn").addEventListener("click", ()=>{ ekranGoster("Desteler","🎯 Kelime çalışması"); desteListeCiz(); });
+  const db = $("#calDevamBtn");
+  if (db) db.addEventListener("click", ()=>calismaBaslat("karisik"));
+  hizliRozetGuncelle();
+}
+
+/* --- Eşleştirme oyunu (Duolingo tarzı: yabancı ↔ anlam) --- */
+function eslestirBaslat(){
+  // anlam öğeleri (kelime + fiil anlamı), öğrenilmemişlere öncelik
+  const u = Calisma.ilerleme.ustalik;
+  const anlamlar = Calisma.birimler.filter(b => b.tip==="anlam" && b.meaning);
+  const oncelik = karistir(anlamlar.filter(b=>(u[b.key]||0)<USTALIK_HEDEF))
+                  .concat(karistir(anlamlar.filter(b=>(u[b.key]||0)>=USTALIK_HEDEF)));
+  Calisma.eslestirKuyruk = oncelik;
+  eslestirTur();
+}
+function eslestirTur(){
+  const grup = Calisma.eslestirKuyruk.splice(0,5);
+  if (grup.length < 2){ calismaBitti(); return; }
+  const kap = $("#ekranCalisma");
+  const sol = karistir(grup.map(g=>({key:g.key, metin:g.term, item:g})));
+  const sag = karistir(grup.map(g=>({key:g.key, metin:g.meaning, item:g})));
+  let html = '<div class="cal-ust"><div class="bilgi"><span>🔗 Eşleştir</span>'+
+             '<span>Kalan grup: '+Math.ceil(Calisma.eslestirKuyruk.length/5)+'</span></div></div>'+
+             '<div class="eslestir" id="eslestirGrid"></div>';
+  kap.innerHTML = html;
+  const grid = $("#eslestirGrid");
+  // iki sütun tek grid: satır satır (sol,sağ) yerine karışık iki blok — grid 2 sütun
+  const hepsi = [];
+  const maxN = Math.max(sol.length, sag.length);
+  for (let i=0;i<maxN;i++){ if(sol[i]) hepsi.push({...sol[i], taraf:"L"}); if(sag[i]) hepsi.push({...sag[i], taraf:"R"}); }
+  let seciliBtn = null, eslesen = 0;
+  hepsi.forEach(x => {
+    const b = olustur("button");
+    b.textContent = x.metin; b.dataset.key = x.key; b.dataset.taraf = x.taraf;
+    b.addEventListener("click", () => {
+      if (b.classList.contains("dogru")) return;
+      if (!seciliBtn){ seciliBtn = b; b.classList.add("sec"); return; }
+      if (seciliBtn === b){ b.classList.remove("sec"); seciliBtn=null; return; }
+      // eşleşme: aynı key, farklı taraf
+      if (seciliBtn.dataset.key === b.dataset.key && seciliBtn.dataset.taraf !== b.dataset.taraf){
+        const b1 = seciliBtn, b2 = b;
+        b1.classList.remove("sec"); b1.classList.add("dogru"); b2.classList.add("dogru");
+        const it = grup.find(g=>g.key===b2.dataset.key);
+        if (it){ const cur=(Calisma.ilerleme.ustalik[it.key]||0); Calisma.ilerleme.ustalik[it.key]=Math.min(USTALIK_HEDEF,cur+1); }
+        konus(it? it.term : b2.textContent, Calisma.deste.language);
+        seciliBtn = null; eslesen++;
+        if (navigator.vibrate) navigator.vibrate(12);
+        setTimeout(()=>{ b1.style.display="none"; b2.style.display="none"; }, 240); // eşleşen kaybolur
+        if (eslesen === grup.length){
+          DB.koy("deste_ilerleme", Object.assign({}, Calisma.ilerleme));
+          istEkle(grup.length);
+          setTimeout(eslestirTur, 520);
+        }
+      } else {
+        const yanlisBtn = b, oncekiBtn = seciliBtn;
+        b.classList.add("yanlis");
+        setTimeout(()=>{ yanlisBtn.classList.remove("yanlis"); oncekiBtn.classList.remove("sec"); }, 500);
+        seciliBtn = null;
+      }
+    });
+    grid.appendChild(b);
+  });
+}
+
+
 
 /* =====================================================================
    5) AYARLAR — tema, font, yedekleme
@@ -1325,8 +1769,15 @@ function olaylariBagla(){
   $("#ayarBtn").addEventListener("click", () => ekranGoster("Ayarlar","Ayarlar"));
   $("#geriBtn").addEventListener("click", () => {
     sesDurdur();
-    if (aktifEkran === "Ayarlar") ekranGoster(oncekiEkran, oncekiEkran==="Kutuphane"?"Okuma":"");
-    else { ekranGoster("Kutuphane","Okuma"); kutuphaneCiz(); hizliRozetGuncelle(); }
+    if ("speechSynthesis" in window) speechSynthesis.cancel();
+    if (aktifEkran === "Ayarlar"){
+      ekranGoster(oncekiEkran, oncekiEkran==="Kutuphane"?"Okuma":"");
+      if (oncekiEkran==="Kutuphane") kutuphaneCiz();
+    } else if (aktifEkran === "Calisma"){
+      ekranGoster("Desteler","🎯 Kelime çalışması"); desteListeCiz();
+    } else {
+      ekranGoster("Kutuphane","Okuma"); kutuphaneCiz(); hizliRozetGuncelle();
+    }
   });
 
   // Tema
@@ -1350,9 +1801,10 @@ function olaylariBagla(){
   $("#okFontBuyut").addEventListener("click", () => { fontDegis(+2); });
   $("#okFontKucult").addEventListener("click", () => { fontDegis(-2); });
 
-  // Kelimelerim & İstatistik
+  // Kelimelerim & İstatistik & Alıştırma
   $("#acKelimeler").addEventListener("click", kelimelerAc);
   $("#acIstatistik").addEventListener("click", istatistikAc);
+  $("#acCalisma").addEventListener("click", calismaAc);
   $("#durumSekme").addEventListener("click", (e) => {
     const btn = e.target.closest("button"); if(!btn) return;
     kelimeFiltre = btn.dataset.f;
