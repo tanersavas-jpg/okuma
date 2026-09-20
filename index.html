@@ -336,11 +336,32 @@ body{
   .kc-baslik span:first-child{ border-right:none; border-bottom:1px solid #ececec; }
   .kc-sol-sayfa{ border-right:none; border-bottom:1px dashed #ececec; }
 }
-/* açık-kitap okuyucuda koyu çevre fonu */
+/* açık-kitap okuyucu: gri fon + siyah üst şerit, yeşil YOK (nötr) */
 body.okuyucu-fon{ background:#2b2b2b; }
+body.okuyucu-fon .ustcubuk{ background:#161616; box-shadow:0 2px 8px rgba(0,0,0,.45); }
 body.okuyucu-fon .ipucu{ color:#c9c4bb; }
 body.okuyucu-fon .ok-araclar button{ background:#3d3d3d; border-color:#525252; color:#f0f0f0; }
 body.okuyucu-fon #okumaBar{ background:#4a4a4a; }
+body.okuyucu-fon #okumaBar > i{ background:#cfcfcf; }        /* ilerleme: gri */
+body.okuyucu-fon .kc-no{ color:#8a8a8a; }                    /* numaralar: gri */
+body.okuyucu-fon .cumle-c .kel.var{ border-bottom-color:#c2c2c2; } /* sözlük ipucu: gri */
+body.okuyucu-fon .okuma-alt button{ background:#3d3d3d; border-color:#525252; color:#f0f0f0; }
+body.okuyucu-fon .okuma-alt button.test{ background:#111; border-color:#111; color:#fff; }
+
+/* TAM EKRAN (sürükleyici) — üst şerit/araçlar gizli, kitap tüm ekranı kaplar */
+#tamEkranCik{ display:none; position:fixed; top:calc(env(safe-area-inset-top) + 8px); right:12px; z-index:90;
+  width:42px; height:42px; border-radius:50%; border:none; background:rgba(0,0,0,.5); color:#fff;
+  font-size:20px; cursor:pointer; align-items:center; justify-content:center; -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); }
+body.tam-ekran #tamEkranCik{ display:flex; }
+body.tam-ekran .ustcubuk{ display:none; }
+body.tam-ekran #ekranOkuyucu{ padding:0; }
+body.tam-ekran #ekranOkuyucu .okuma-arac-satir,
+body.tam-ekran #ekranOkuyucu .ipucu,
+body.tam-ekran #okumaBar{ display:none; }
+body.tam-ekran #okumaCift{ max-width:none; margin:0; }
+body.tam-ekran .kitap-cift{ border-radius:0; border-left:none; border-right:none; border-top:none; }
+body.tam-ekran #okumaCift .okuma-alt{ max-width:none; margin:0;
+  padding:10px 16px calc(env(safe-area-inset-bottom) + 10px); }
 
 /* ===================== KELİME ÇALIŞMASI ===================== */
 .deste-kart{background:var(--kagit-2); border:1px solid var(--cizgi); border-radius:16px;
@@ -458,6 +479,7 @@ body.okuyucu-fon #okumaBar{ background:#4a4a4a; }
   <div id="okumaBar"><i></i></div>
   <div class="okuma-arac-satir">
     <div class="ok-araclar">
+      <button id="tamEkranBtn" title="Tam ekran">⛶</button>
       <button id="okSesBtn" title="Sesli oku">🔊</button>
       <button id="yerImiBtn" title="Yer imi">🔖</button>
       <button id="okFontKucult" title="Küçült">A−</button>
@@ -480,8 +502,10 @@ body.okuyucu-fon #okumaBar{ background:#4a4a4a; }
     </div>
   </div>
 
-  <!-- AÇIK-KİTAP ÇİFT DİL MOD (sol orijinal / sağ Türkçe, tek kaydırma) -->
+  <!-- AÇIK-KİTAP ÇİFT DİL MOD (sol orijinal / sağ Türkçe) -->
   <div id="okumaCift" class="gizli"></div>
+
+  <button id="tamEkranCik" title="Tam ekrandan çık">✕</button>
 </main>
 
 <div id="baloncuk" class="gizli"></div>
@@ -734,6 +758,7 @@ function ekranGoster(ad, baslik){
   $("#ayarBtn").classList.toggle("gizli", ad === "Ayarlar");
   // açık-kitap okuyucuda çevre fonu koyu yap (beyaz sayfalar öne çıksın)
   document.body.classList.toggle("okuyucu-fon", ad === "Okuyucu" && !!Okuyucu.ciftDil);
+  if (ad !== "Okuyucu") document.body.classList.remove("tam-ekran"); // okuyucudan çıkınca tam ekranı kapat
   window.scrollTo(0,0);
 }
 
@@ -2036,6 +2061,8 @@ function olaylariBagla(){
   });
   $("#yerImiBtn").addEventListener("click", yerImiToggle);
   $("#okSesBtn").addEventListener("click", sayfaSesliOku);
+  $("#tamEkranBtn").addEventListener("click", () => document.body.classList.add("tam-ekran"));
+  $("#tamEkranCik").addEventListener("click", () => document.body.classList.remove("tam-ekran"));
   $("#okFontBuyut").addEventListener("click", () => { fontDegis(+2); });
   $("#okFontKucult").addEventListener("click", () => { fontDegis(-2); });
 
