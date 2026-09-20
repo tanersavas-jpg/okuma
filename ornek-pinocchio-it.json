@@ -14,6 +14,12 @@
         "Un giorno arrivò nella bottega di un vecchio falegname.",
         "Il suo nome era Mastro Ciliegia."
       ],
+      "sentences_tr": [
+        "Bir zamanlar bir odun parçası vardı.",
+        "Özel bir odun değildi, sıradan bir şömine odunuydu.",
+        "Bir gün yaşlı bir marangozun atölyesine geldi.",
+        "Adı Usta Ciliegia'ydı."
+      ],
       "vocab": [
         {"it": "legno", "tr": "odun / tahta", "note": ""},
         {"it": "falegname", "tr": "marangoz", "note": ""},
@@ -31,6 +37,12 @@
         "Ma una vocina disse: «Non picchiare così forte!»",
         "Il falegname guardò intorno, ma non c'era nessuno.",
         "Ebbe molta paura e cominciò a tremare."
+      ],
+      "sentences_tr": [
+        "Usta Ciliegia odunu kesmek için baltayı aldı.",
+        "Ama küçük bir ses dedi ki: «Bu kadar sert vurma!»",
+        "Marangoz etrafına baktı ama kimse yoktu.",
+        "Çok korktu ve titremeye başladı."
       ],
       "vocab": [
         {"it": "ascia", "tr": "balta", "note": ""},

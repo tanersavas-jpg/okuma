@@ -17,6 +17,9 @@ selamlama ya da metin yazma. Kurallar:
   İtalyanca ise "it", İngilizce ise "en". (Örnek: {"it":"gatto","tr":"kedi"})
 - "tr": her kelimenin ve gerekiyorsa notun TÜRKÇE karşılığı.
 - Her sayfada 4–8 kısa, A2 seviyesinde cümle ("sentences").
+- "sentences_tr": HER cümlenin Türkçe karşılığı, "sentences" ile AYNI
+  SIRADA ve AYNI SAYIDA. (Uygulama açık kitapta solda orijinali, sağda
+  bu Türkçeyi aynı numarayla gösterir — mutlaka ekle.)
 - "vocab": o sayfadaki ZOR/yeni kelimeler + Türkçe anlamı (5–10 kelime).
 - "quiz": hikâyenin sonunda 3–5 çoktan seçmeli soru; sorular ve
   şıklar öğrenilen dilde. "answer" = doğru şıkkın SIRA NUMARASI,
@@ -37,6 +40,7 @@ selamlama ya da metin yazma. Kurallar:
       "chapter": "Capitolo 1 — ...",
       "image_hint": "...",
       "sentences": ["Cümle bir.", "Cümle iki."],
+      "sentences_tr": ["Birinci cümlenin Türkçesi.", "İkinci cümlenin Türkçesi."],
       "vocab": [
         {"it": "kelime", "tr": "türkçesi", "note": ""}
       ]
