@@ -1,7 +1,7 @@
 /* Okuma — Service Worker (çevrimdışı önbellek)
    Uygulama kabuğunu önbelleğe alır; çevrimdışı açılır.
    Dosyalar değişince CACHE sürümünü artır (okuma-v2, v3 ...). */
-const CACHE = "okuma-v12";
+const CACHE = "okuma-v13";
 const KABUK = [
   "./",
   "./index.html",

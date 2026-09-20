@@ -936,39 +936,19 @@ function cumleBul(page, ci){
 }
 
 // Her JSON "page" (bölüm) = bir açık-kitap sayfası. Numaralar baştan sürekli.
-function kitapCiz(){
-  sesDurdur();
-  const pages = Okuyucu.hikaye.pages || [];
-  Okuyucu.toplamSpread = Math.max(1, pages.length);
-  Okuyucu.sayfaBaslangic = []; let acc=0;
-  pages.forEach(pg => { Okuyucu.sayfaBaslangic.push(acc); acc += (pg.sentences||[]).length; });
-  let sp = Okuyucu.ilerleme.spread || 0;
-  if (sp >= Okuyucu.toplamSpread) sp = Okuyucu.toplamSpread - 1;
-  Okuyucu.spreadIx = sp;
-  Okuyucu.gorunum = Okuyucu.ilerleme.gorunum || "cift";
-  if (!Okuyucu.sayildi){
-    Okuyucu.sayildi = true;
-    const ks = pages.reduce((t,pg)=>t+(pg.sentences||[]).reduce((a,c)=>a+c.split(/\s+/).filter(Boolean).length,0),0);
-    if (ks) istEkle(ks);
-  }
-  spreadCiz();
+// Tüm paragrafları tek dizine (sürekli numaralı) topla
+function ciftUnitsKur(h){
+  const list=[]; let n=0;
+  (h.pages||[]).forEach(sf=>{
+    const tr=sf.sentences_tr||[];
+    (sf.sentences||[]).forEach((c,ci)=>{ n++;
+      list.push({ n, page:sf.page, ci, orig:c, tr:(tr[ci]||"—"), chapter:(ci===0?(sf.chapter||""):"") }); });
+  });
+  return list;
 }
 
-// Bir sayfa (bölüm): sol orijinal / sağ Türkçe; görünüme göre tek/çift; yon: animasyon
-function spreadCiz(yon){
-  sesDurdur();
-  const kap = $("#okumaCift");
-  const h = Okuyucu.hikaye;
-  const sf = (h.pages||[])[Okuyucu.spreadIx] || { sentences:[], sentences_tr:[] };
-  const basNo = Okuyucu.sayfaBaslangic[Okuyucu.spreadIx] || 0;
-  const trList = sf.sentences_tr || [];
-  const vurguSet = (page)=> (Okuyucu.ilerleme.highlights[page]||[]);
-
-  $("#okumaBar > i").style.width = Math.round(((Okuyucu.spreadIx+1)/Okuyucu.toplamSpread)*100) + "%";
-
-  const kitap = olustur("div","kitap-cift");
-
-  // başlık: tıklanabilir dil etiketleri (tek dile geçiş / iki dile dönüş)
+// başlık (tıklanabilir dil etiketleri)
+function kcBaslikYap(h){
   const basl = olustur("div","kc-baslik");
   if (Okuyucu.gorunum === "cift"){
     const a=olustur("span","kc-dil"); a.textContent=dilEtiket(h.language); a.dataset.g="it";
@@ -981,40 +961,115 @@ function spreadCiz(yon){
     basl.appendChild(geri); basl.appendChild(dil);
   }
   basl.addEventListener("click", e=>{ const s=e.target.closest(".kc-dil"); if(s) gorunumAyarla(s.dataset.g); });
-  kitap.appendChild(basl);
+  return basl;
+}
 
+// Sayfaları ekranı dolduracak biçimde hesapla (yükseklik ölçerek)
+function ciftSayfalandir(){
+  const h = Okuyucu.hikaye, units = Okuyucu.ciftUnits, N = units.length;
+  const kap = $("#okumaCift");
+  // ölçüm için tümünü geçici render et
+  const kitap = olustur("div","kitap-cift olcum");
+  kitap.appendChild(kcBaslikYap(h));
   const sol = olustur("div","kc-sayfa kc-sol-sayfa");
   const sag = olustur("div","kc-sayfa kc-sag-sayfa");
-  if (sf.chapter){
-    const hs=olustur("div","kc-bolum-ic"); hs.textContent=sf.chapter; sol.appendChild(hs);
-    const ht=olustur("div","kc-bolum-ic"); ht.textContent=sf.chapter; sag.appendChild(ht);
-  }
-  (sf.sentences||[]).forEach((c, ci)=>{
-    const n = basNo + ci + 1;
-    const vurgulu = vurguSet(sf.page).includes(ci);
-    const cs = olustur("span","cumle-c");
-    cs.dataset.page=sf.page; cs.dataset.ci=ci;
-    if (vurgulu) cs.classList.add("vurgu");
-    cs.appendChild(numaraEl(n)); kelimeleriEkle(cs, c);
-    cumleEtkilesimC(cs, sf.page, ci);
-    sol.appendChild(cs); sol.appendChild(document.createTextNode(" "));
-
-    const ts = olustur("span","cumle-c ceviri");
-    ts.dataset.page=sf.page; ts.dataset.ci=ci;
-    if (vurgulu) ts.classList.add("vurgu");
-    ts.appendChild(numaraEl(n)); ts.appendChild(document.createTextNode(trList[ci]||"—"));
-    cumleEtkilesimC(ts, sf.page, ci);
-    sag.appendChild(ts); sag.appendChild(document.createTextNode(" "));
+  const solEl=[], sagEl=[];
+  units.forEach((u,i)=>{
+    if (u.chapter){ const a=olustur("div","kc-bolum-ic"); a.textContent=u.chapter; sol.appendChild(a);
+      const b=olustur("div","kc-bolum-ic"); b.textContent=u.chapter; sag.appendChild(b); }
+    const cs=olustur("span","cumle-c"); cs.appendChild(numaraEl(u.n)); kelimeleriEkle(cs,u.orig);
+    sol.appendChild(cs); sol.appendChild(document.createTextNode(" ")); solEl[i]=cs;
+    const ts=olustur("span","cumle-c ceviri"); ts.appendChild(numaraEl(u.n)); ts.appendChild(document.createTextNode(u.tr));
+    sag.appendChild(ts); sag.appendChild(document.createTextNode(" ")); sagEl[i]=ts;
   });
   kitap.appendChild(sol); kitap.appendChild(sag);
-  if (yon){ kitap.classList.add(yon>0 ? "cevir-ileri":"cevir-geri"); }
+  kap.classList.remove("g-it","g-tr");
+  if (Okuyucu.gorunum==="it") kap.classList.add("g-it");
+  else if (Okuyucu.gorunum==="tr") kap.classList.add("g-tr");
+  kap.innerHTML=""; kap.appendChild(kitap);
+
+  // kullanılabilir yükseklik
+  const col = (Okuyucu.gorunum==="tr") ? sag : sol;
+  const cr = col.getBoundingClientRect();
+  const csS = getComputedStyle(col);
+  const padTop = parseFloat(csS.paddingTop)||0, padBot = parseFloat(csS.paddingBottom)||0;
+  const contentTop = cr.top + padTop;
+  const navRezerv = 66 + 26 + padBot + 50;   // gezinme + boşluk + güvenlik payı
+  const availH = Math.max(180, window.innerHeight - contentTop - navRezerv);
+
+  const tekDil = (Okuyucu.gorunum!=="cift");
+  const yuk = (el, ref)=> el.getBoundingClientRect().bottom - ref;
+  const ust = (el, ref)=> el.getBoundingClientRect().top - ref;
+
+  const breaks=[]; let s=0;
+  while (s<N){
+    const solRef = solEl[s].getBoundingClientRect().top;
+    const sagRef = sagEl[s].getBoundingClientRect().top;
+    let e=s;
+    for (let j=s;j<N;j++){
+      const lb = solEl[j].getBoundingClientRect().bottom - solRef;
+      const rb = sagEl[j].getBoundingClientRect().bottom - sagRef;
+      const yh = tekDil ? (Okuyucu.gorunum==="tr"?rb:lb) : Math.max(lb,rb);
+      if (yh <= availH) e=j; else break;
+    }
+    if (e<s) e=s;
+    breaks.push([s,e]); s=e+1;
+  }
+  Okuyucu.pageBreaks = breaks.length ? breaks : [[0, Math.max(0,N-1)]];
+  Okuyucu.toplamSpread = Okuyucu.pageBreaks.length;
+}
+
+function kitapCiz(){
+  sesDurdur();
+  Okuyucu.ciftUnits = ciftUnitsKur(Okuyucu.hikaye);
+  Okuyucu.gorunum = Okuyucu.ilerleme.gorunum || "cift";
+  if (!Okuyucu.sayildi){
+    Okuyucu.sayildi = true;
+    const ks = Okuyucu.ciftUnits.reduce((t,u)=>t+u.orig.split(/\s+/).filter(Boolean).length,0);
+    if (ks) istEkle(ks);
+  }
+  ciftSayfalandir();
+  let sp = Okuyucu.ilerleme.spread || 0;
+  if (sp >= Okuyucu.toplamSpread) sp = Okuyucu.toplamSpread-1; if (sp<0) sp=0;
+  Okuyucu.spreadIx = sp;
+  spreadCiz();
+}
+
+// Bir açılım: pageBreaks[spreadIx] aralığındaki paragraflar; sol orijinal / sağ Türkçe
+function spreadCiz(yon){
+  sesDurdur();
+  const kap=$("#okumaCift"), h=Okuyucu.hikaye;
+  const aralik = Okuyucu.pageBreaks[Okuyucu.spreadIx] || [0, Okuyucu.ciftUnits.length-1];
+  const [s,e]=aralik;
+  const vurguSet=(page)=>(Okuyucu.ilerleme.highlights[page]||[]);
+
+  $("#okumaBar > i").style.width = Math.round(((Okuyucu.spreadIx+1)/Okuyucu.toplamSpread)*100)+"%";
+
+  const kitap=olustur("div","kitap-cift");
+  kitap.appendChild(kcBaslikYap(h));
+  const sol=olustur("div","kc-sayfa kc-sol-sayfa");
+  const sag=olustur("div","kc-sayfa kc-sag-sayfa");
+  for (let i=s;i<=e && i<Okuyucu.ciftUnits.length;i++){
+    const u=Okuyucu.ciftUnits[i];
+    if (u.chapter){ const hs=olustur("div","kc-bolum-ic"); hs.textContent=u.chapter; sol.appendChild(hs);
+      const ht=olustur("div","kc-bolum-ic"); ht.textContent=u.chapter; sag.appendChild(ht); }
+    const vur=vurguSet(u.page).includes(u.ci);
+    const cs=olustur("span","cumle-c"); cs.dataset.page=u.page; cs.dataset.ci=u.ci; if(vur)cs.classList.add("vurgu");
+    cs.appendChild(numaraEl(u.n)); kelimeleriEkle(cs,u.orig); cumleEtkilesimC(cs,u.page,u.ci);
+    sol.appendChild(cs); sol.appendChild(document.createTextNode(" "));
+    const ts=olustur("span","cumle-c ceviri"); ts.dataset.page=u.page; ts.dataset.ci=u.ci; if(vur)ts.classList.add("vurgu");
+    ts.appendChild(numaraEl(u.n)); ts.appendChild(document.createTextNode(u.tr)); cumleEtkilesimC(ts,u.page,u.ci);
+    sag.appendChild(ts); sag.appendChild(document.createTextNode(" "));
+  }
+  kitap.appendChild(sol); kitap.appendChild(sag);
+  if (yon) kitap.classList.add(yon>0?"cevir-ileri":"cevir-geri");
 
   kap.classList.remove("g-it","g-tr");
   if (Okuyucu.gorunum==="it") kap.classList.add("g-it");
   else if (Okuyucu.gorunum==="tr") kap.classList.add("g-tr");
-  kap.innerHTML = ""; kap.appendChild(kitap);
+  kap.innerHTML=""; kap.appendChild(kitap);
 
-  const alt = olustur("div","okuma-alt");
+  const alt=olustur("div","okuma-alt");
   const onceki=olustur("button"); onceki.textContent="‹ Önceki"; onceki.disabled=(Okuyucu.spreadIx===0);
   const bilgi=olustur("span","sayfabilgi"); bilgi.textContent=(Okuyucu.spreadIx+1)+"/"+Okuyucu.toplamSpread;
   const sonMu=(Okuyucu.spreadIx===Okuyucu.toplamSpread-1);
@@ -1026,10 +1081,8 @@ function spreadCiz(yon){
   alt.appendChild(onceki); alt.appendChild(bilgi); alt.appendChild(sonraki);
   kap.appendChild(alt);
 
-  const yuzde=Math.round(((Okuyucu.spreadIx+1)/Okuyucu.toplamSpread)*100);
-  ilerlemeKaydet({ spread:Okuyucu.spreadIx, yuzde });
-  baloncukKapat();
-  window.scrollTo(0,0);
+  ilerlemeKaydet({ spread:Okuyucu.spreadIx, yuzde:Math.round(((Okuyucu.spreadIx+1)/Okuyucu.toplamSpread)*100) });
+  baloncukKapat(); window.scrollTo(0,0);
 }
 
 function spreadGit(d){
@@ -1038,10 +1091,21 @@ function spreadGit(d){
   Okuyucu.spreadIx=yeni; spreadCiz(d);
 }
 
+// ekran/font/görünüm değişince yeniden sayfala
+function ciftYenidenSayfala(){
+  if (!(aktifEkran==="Okuyucu" && Okuyucu.ciftDil)) return;
+  const s=Okuyucu.spreadIx;
+  ciftSayfalandir();
+  Okuyucu.spreadIx=Math.max(0, Math.min(s, Okuyucu.toplamSpread-1));
+  spreadCiz();
+}
+
 // görünüm: "cift" | "it" (tek orijinal) | "tr" (tek Türkçe)
 function gorunumAyarla(g){
   Okuyucu.gorunum = g;
   ilerlemeKaydet({ gorunum:g });
+  ciftSayfalandir();
+  Okuyucu.spreadIx = Math.min(Okuyucu.spreadIx, Okuyucu.toplamSpread-1);
   spreadCiz();
 }
 
@@ -2090,8 +2154,8 @@ function olaylariBagla(){
   });
   $("#yerImiBtn").addEventListener("click", yerImiToggle);
   $("#okSesBtn").addEventListener("click", sayfaSesliOku);
-  $("#tamEkranBtn").addEventListener("click", () => document.body.classList.add("tam-ekran"));
-  $("#tamEkranCik").addEventListener("click", () => document.body.classList.remove("tam-ekran"));
+  $("#tamEkranBtn").addEventListener("click", () => { document.body.classList.add("tam-ekran"); setTimeout(ciftYenidenSayfala,60); });
+  $("#tamEkranCik").addEventListener("click", () => { document.body.classList.remove("tam-ekran"); setTimeout(ciftYenidenSayfala,60); });
   $("#teKucult").addEventListener("click", () => fontDegis(-2));
   $("#teBuyut").addEventListener("click", () => fontDegis(+2));
   $("#okFontBuyut").addEventListener("click", () => { fontDegis(+2); });
@@ -2128,7 +2192,15 @@ function fontDegis(delta){
   px = Math.max(13, Math.min(34, px));
   Ayar.koy("font", px); fontUygula();
   toast("Yazı boyutu: "+px+"px");
+  ciftYenidenSayfala();   // font değişince açık-kitabı yeniden sayfala
 }
+
+// ekran döndürme / boyut değişince açık-kitabı yeniden sayfala
+let _yenidenSayfaZaman=null;
+window.addEventListener("resize", () => {
+  clearTimeout(_yenidenSayfaZaman);
+  _yenidenSayfaZaman = setTimeout(ciftYenidenSayfala, 250);
+});
 
 function baslat(){
   temaUygula(); fontUygula();
