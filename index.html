@@ -289,11 +289,13 @@ body{
 #ekranOkuyucu{ max-width:none; }           /* okuyucu ekranı .ekran 820px kısıtından muaf */
 #okumaCift{ max-width:1150px; margin:8px auto 18px; perspective:2200px; }
 .kitap-cift{
-  display:grid; grid-template-columns:1fr 1fr;
+  display:grid; grid-template-columns:1fr 1fr; grid-template-rows:auto 1fr;
   background:#ffffff; border:1px solid #e3e3e3; border-radius:8px; overflow:hidden;
   box-shadow: 0 14px 34px rgba(30,25,15,.18), 0 2px 6px rgba(30,25,15,.10);
   transform-origin:left center;
+  min-height:calc(100dvh - 250px);   /* kısa bölümde bile sayfa ekranı doldursun (alt beyaz kalır) */
 }
+body.tam-ekran .kitap-cift{ min-height:calc(100dvh - 96px); }
 :root[data-tema="koyu"] .kitap-cift{ background:#161a1f; border-color:#333a42; box-shadow:0 14px 34px rgba(0,0,0,.5); }
 .kc-baslik{ grid-column:1 / -1; display:grid; grid-template-columns:1fr 1fr;
   font-size:12px; font-weight:700; letter-spacing:.4px; color:#8a8378; border-bottom:1px solid #ececec; }
