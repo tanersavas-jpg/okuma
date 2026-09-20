@@ -300,8 +300,8 @@ body{
 .kc-baslik span{ padding:9px 16px; text-align:center; }
 .kc-baslik span:first-child{ border-right:1px solid #ececec; }
 :root[data-tema="koyu"] .kc-baslik span:first-child{ border-right-color:#333a42; }
-.kc-sayfa{ padding:26px 30px 30px; font-family:Georgia,"Times New Roman","Iowan Old Style",serif;
-  font-size:var(--okuma-boyut); line-height:2.0; color:#111111; text-align:justify;
+.kc-sayfa{ padding:24px 30px 28px; font-family:Georgia,"Times New Roman","Iowan Old Style",serif;
+  font-size:var(--okuma-boyut); line-height:1.6; color:#111111; text-align:justify;
   -webkit-hyphens:auto; hyphens:auto; -webkit-user-select:none; user-select:none; }
 :root[data-tema="koyu"] .kc-sayfa{ color:#e9e4d8; }
 .kc-sol-sayfa{ border-right:1px solid #ececec; }
@@ -336,6 +336,11 @@ body{
   .kc-baslik span:first-child{ border-right:none; border-bottom:1px solid #ececec; }
   .kc-sol-sayfa{ border-right:none; border-bottom:1px dashed #ececec; }
 }
+/* açık-kitap okuyucuda koyu çevre fonu */
+body.okuyucu-fon{ background:#2b2b2b; }
+body.okuyucu-fon .ipucu{ color:#c9c4bb; }
+body.okuyucu-fon .ok-araclar button{ background:#3d3d3d; border-color:#525252; color:#f0f0f0; }
+body.okuyucu-fon #okumaBar{ background:#4a4a4a; }
 
 /* ===================== KELİME ÇALIŞMASI ===================== */
 .deste-kart{background:var(--kagit-2); border:1px solid var(--cizgi); border-radius:16px;
@@ -727,6 +732,8 @@ function ekranGoster(ad, baslik){
   const koklu = (ad === "Kutuphane");
   $("#geriBtn").classList.toggle("gizli", koklu);
   $("#ayarBtn").classList.toggle("gizli", ad === "Ayarlar");
+  // açık-kitap okuyucuda çevre fonu koyu yap (beyaz sayfalar öne çıksın)
+  document.body.classList.toggle("okuyucu-fon", ad === "Okuyucu" && !!Okuyucu.ciftDil);
   window.scrollTo(0,0);
 }
 
