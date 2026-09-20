@@ -27,7 +27,7 @@
   --golge:0 2px 10px rgba(60,50,30,.12);
   --dogru:#2e7d43;
   --yanlis:#c0492f;
-  --okuma-boyut:22px;     /* okuyucu font boyutu (ayarlanır) */
+  --okuma-boyut:19px;     /* okuyucu font boyutu (A−/A+ ile ayarlanır) */
 }
 :root[data-tema="koyu"]{
   --kagit:#20242a;
@@ -300,8 +300,8 @@ body{
 .kc-baslik span{ padding:9px 16px; text-align:center; }
 .kc-baslik span:first-child{ border-right:1px solid #ececec; }
 :root[data-tema="koyu"] .kc-baslik span:first-child{ border-right-color:#333a42; }
-.kc-sayfa{ padding:24px 30px 28px; font-family:Georgia,"Times New Roman","Iowan Old Style",serif;
-  font-size:var(--okuma-boyut); line-height:1.6; color:#111111; text-align:justify;
+.kc-sayfa{ padding:22px 28px 26px; font-family:Georgia,"Times New Roman","Iowan Old Style",serif;
+  font-size:var(--okuma-boyut); line-height:1.42; color:#111111; text-align:justify;
   -webkit-hyphens:auto; hyphens:auto; -webkit-user-select:none; user-select:none; }
 :root[data-tema="koyu"] .kc-sayfa{ color:#e9e4d8; }
 .kc-sol-sayfa{ border-right:1px solid #ececec; }
@@ -318,6 +318,16 @@ body{
 .cumle-c .kel.var{ border-bottom:2px dotted #9bbfa6; }   /* beyaz zeminde sözlük ipucu */
 .kc-no{ font-size:.56em; font-weight:800; color:#2f7d49; vertical-align:super; margin-right:2px; font-family:-apple-system,sans-serif; }
 #okumaCift .okuma-alt{ max-width:1150px; margin:14px auto 0; }
+/* tıklanabilir dil başlıkları + tek dil görünümü */
+.kc-dil{ cursor:pointer; -webkit-user-select:none; user-select:none; }
+.kc-dil:active{ opacity:.55; }
+.kc-geri{ text-decoration:underline; }
+#okumaCift.g-it .kitap-cift, #okumaCift.g-tr .kitap-cift{ grid-template-columns:1fr; }
+#okumaCift.g-it .kc-sag-sayfa{ display:none; }
+#okumaCift.g-tr .kc-sol-sayfa{ display:none; }
+#okumaCift.g-it .kc-sol-sayfa{ border-right:none; }
+#okumaCift.g-tr .kc-sag-sayfa{ color:#111111; }
+:root[data-tema="koyu"] #okumaCift.g-tr .kc-sag-sayfa{ color:#e9e4d8; }
 
 /* Sayfa çevirme animasyonu (yaprak dönüşü hissi) */
 .kitap-cift.cevir-ileri{ animation:kcCevirIleri .42s cubic-bezier(.25,.8,.35,1); }
@@ -349,10 +359,11 @@ body.okuyucu-fon .okuma-alt button{ background:#3d3d3d; border-color:#525252; co
 body.okuyucu-fon .okuma-alt button.test{ background:#111; border-color:#111; color:#fff; }
 
 /* TAM EKRAN (sürükleyici) — üst şerit/araçlar gizli, kitap tüm ekranı kaplar */
-#tamEkranCik{ display:none; position:fixed; top:calc(env(safe-area-inset-top) + 8px); right:12px; z-index:90;
-  width:42px; height:42px; border-radius:50%; border:none; background:rgba(0,0,0,.5); color:#fff;
-  font-size:20px; cursor:pointer; align-items:center; justify-content:center; -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); }
-body.tam-ekran #tamEkranCik{ display:flex; }
+#tamEkranArac{ display:none; position:fixed; top:calc(env(safe-area-inset-top) + 8px); right:12px; z-index:90; gap:8px; }
+body.tam-ekran #tamEkranArac{ display:flex; }
+#tamEkranArac button{ width:42px; height:42px; border-radius:50%; border:none; background:rgba(0,0,0,.5); color:#fff;
+  font-size:17px; font-weight:700; cursor:pointer; -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); }
+#tamEkranArac #tamEkranCik{ font-size:20px; }
 body.tam-ekran .ustcubuk{ display:none; }
 body.tam-ekran #ekranOkuyucu{ padding:0; }
 body.tam-ekran #ekranOkuyucu .okuma-arac-satir,
@@ -505,7 +516,11 @@ body.tam-ekran #okumaCift .okuma-alt{ max-width:none; margin:0;
   <!-- AÇIK-KİTAP ÇİFT DİL MOD (sol orijinal / sağ Türkçe) -->
   <div id="okumaCift" class="gizli"></div>
 
-  <button id="tamEkranCik" title="Tam ekrandan çık">✕</button>
+  <div id="tamEkranArac">
+    <button id="teKucult" title="Küçült">A−</button>
+    <button id="teBuyut" title="Büyüt">A+</button>
+    <button id="tamEkranCik" title="Tam ekrandan çık">✕</button>
+  </div>
 </main>
 
 <div id="baloncuk" class="gizli"></div>
@@ -917,103 +932,114 @@ function cumleBul(page, ci){
   return pg ? (pg.sentences[ci]||"") : "";
 }
 
-const CIFT_SAYFA_CUMLE = 10;   // gerçek kitap: her açılımda ~10 cümle
-
-function ciftBirimleriKur(h){
-  const list = []; let n = 0;
-  (h.pages||[]).forEach(sf => {
-    const trList = sf.sentences_tr || [];
-    (sf.sentences||[]).forEach((c, ci) => {
-      n++;
-      list.push({ n, page:sf.page, ci, orig:c, tr:(trList[ci]||"—"),
-                  chapter:(ci===0 ? (sf.chapter||"") : "") });
-    });
-  });
-  return list;
-}
-
+// Her JSON "page" (bölüm) = bir açık-kitap sayfası. Numaralar baştan sürekli.
 function kitapCiz(){
   sesDurdur();
-  Okuyucu.ciftBirimler = ciftBirimleriKur(Okuyucu.hikaye);
-  Okuyucu.toplamSpread = Math.max(1, Math.ceil(Okuyucu.ciftBirimler.length / CIFT_SAYFA_CUMLE));
+  const pages = Okuyucu.hikaye.pages || [];
+  Okuyucu.toplamSpread = Math.max(1, pages.length);
+  Okuyucu.sayfaBaslangic = []; let acc=0;
+  pages.forEach(pg => { Okuyucu.sayfaBaslangic.push(acc); acc += (pg.sentences||[]).length; });
   let sp = Okuyucu.ilerleme.spread || 0;
   if (sp >= Okuyucu.toplamSpread) sp = Okuyucu.toplamSpread - 1;
   Okuyucu.spreadIx = sp;
+  Okuyucu.gorunum = Okuyucu.ilerleme.gorunum || "cift";
   if (!Okuyucu.sayildi){
     Okuyucu.sayildi = true;
-    const ks = Okuyucu.ciftBirimler.reduce((t,b)=>t+b.orig.split(/\s+/).filter(Boolean).length,0);
+    const ks = pages.reduce((t,pg)=>t+(pg.sentences||[]).reduce((a,c)=>a+c.split(/\s+/).filter(Boolean).length,0),0);
     if (ks) istEkle(ks);
   }
   spreadCiz();
 }
 
-// Bir açılım (spread): sol orijinal / sağ Türkçe, akıcı; yon: +1 ileri / -1 geri (animasyon)
+// Bir sayfa (bölüm): sol orijinal / sağ Türkçe; görünüme göre tek/çift; yon: animasyon
 function spreadCiz(yon){
   sesDurdur();
   const kap = $("#okumaCift");
   const h = Okuyucu.hikaye;
-  const bas = Okuyucu.spreadIx * CIFT_SAYFA_CUMLE;
-  const grup = Okuyucu.ciftBirimler.slice(bas, bas + CIFT_SAYFA_CUMLE);
+  const sf = (h.pages||[])[Okuyucu.spreadIx] || { sentences:[], sentences_tr:[] };
+  const basNo = Okuyucu.sayfaBaslangic[Okuyucu.spreadIx] || 0;
+  const trList = sf.sentences_tr || [];
+  const vurguSet = (page)=> (Okuyucu.ilerleme.highlights[page]||[]);
 
   $("#okumaBar > i").style.width = Math.round(((Okuyucu.spreadIx+1)/Okuyucu.toplamSpread)*100) + "%";
 
   const kitap = olustur("div","kitap-cift");
+
+  // başlık: tıklanabilir dil etiketleri (tek dile geçiş / iki dile dönüş)
   const basl = olustur("div","kc-baslik");
-  basl.innerHTML = '<span></span><span>🇹🇷 Türkçe</span>';
-  basl.children[0].textContent = dilEtiket(h.language);
+  if (Okuyucu.gorunum === "cift"){
+    const a=olustur("span","kc-dil"); a.textContent=dilEtiket(h.language); a.dataset.g="it";
+    const b=olustur("span","kc-dil"); b.textContent="🇹🇷 Türkçe"; b.dataset.g="tr";
+    basl.appendChild(a); basl.appendChild(b);
+  } else {
+    const geri=olustur("span","kc-dil kc-geri"); geri.textContent="⇆ İki dil"; geri.dataset.g="cift";
+    const dil=olustur("span","kc-dil aktifdil");
+    dil.textContent = (Okuyucu.gorunum==="it") ? dilEtiket(h.language) : "🇹🇷 Türkçe";
+    basl.appendChild(geri); basl.appendChild(dil);
+  }
+  basl.addEventListener("click", e=>{ const s=e.target.closest(".kc-dil"); if(s) gorunumAyarla(s.dataset.g); });
   kitap.appendChild(basl);
 
   const sol = olustur("div","kc-sayfa kc-sol-sayfa");
   const sag = olustur("div","kc-sayfa kc-sag-sayfa");
-  const vurguSet = (page) => (Okuyucu.ilerleme.highlights[page]||[]);
-
-  grup.forEach(b => {
-    if (b.chapter){
-      const hs=olustur("div","kc-bolum-ic"); hs.textContent=b.chapter; sol.appendChild(hs);
-      const ht=olustur("div","kc-bolum-ic"); ht.innerHTML="&nbsp;"; sag.appendChild(ht);
-    }
+  if (sf.chapter){
+    const hs=olustur("div","kc-bolum-ic"); hs.textContent=sf.chapter; sol.appendChild(hs);
+    const ht=olustur("div","kc-bolum-ic"); ht.textContent=sf.chapter; sag.appendChild(ht);
+  }
+  (sf.sentences||[]).forEach((c, ci)=>{
+    const n = basNo + ci + 1;
+    const vurgulu = vurguSet(sf.page).includes(ci);
     const cs = olustur("span","cumle-c");
-    cs.dataset.page=b.page; cs.dataset.ci=b.ci;
-    if (vurguSet(b.page).includes(b.ci)) cs.classList.add("vurgu");
-    cs.appendChild(numaraEl(b.n)); kelimeleriEkle(cs, b.orig);
-    cumleEtkilesimC(cs, b.page, b.ci);
+    cs.dataset.page=sf.page; cs.dataset.ci=ci;
+    if (vurgulu) cs.classList.add("vurgu");
+    cs.appendChild(numaraEl(n)); kelimeleriEkle(cs, c);
+    cumleEtkilesimC(cs, sf.page, ci);
     sol.appendChild(cs); sol.appendChild(document.createTextNode(" "));
 
     const ts = olustur("span","cumle-c ceviri");
-    ts.dataset.page=b.page; ts.dataset.ci=b.ci;
-    if (vurguSet(b.page).includes(b.ci)) ts.classList.add("vurgu");
-    ts.appendChild(numaraEl(b.n)); ts.appendChild(document.createTextNode(b.tr));
-    cumleEtkilesimC(ts, b.page, b.ci);
+    ts.dataset.page=sf.page; ts.dataset.ci=ci;
+    if (vurgulu) ts.classList.add("vurgu");
+    ts.appendChild(numaraEl(n)); ts.appendChild(document.createTextNode(trList[ci]||"—"));
+    cumleEtkilesimC(ts, sf.page, ci);
     sag.appendChild(ts); sag.appendChild(document.createTextNode(" "));
   });
   kitap.appendChild(sol); kitap.appendChild(sag);
-  if (yon){ kitap.classList.add(yon>0 ? "cevir-ileri" : "cevir-geri"); }
+  if (yon){ kitap.classList.add(yon>0 ? "cevir-ileri":"cevir-geri"); }
 
+  kap.classList.remove("g-it","g-tr");
+  if (Okuyucu.gorunum==="it") kap.classList.add("g-it");
+  else if (Okuyucu.gorunum==="tr") kap.classList.add("g-tr");
   kap.innerHTML = ""; kap.appendChild(kitap);
 
   const alt = olustur("div","okuma-alt");
-  const onceki = olustur("button"); onceki.textContent="‹ Önceki"; onceki.disabled=(Okuyucu.spreadIx===0);
-  const bilgi = olustur("span","sayfabilgi"); bilgi.textContent=(Okuyucu.spreadIx+1)+"/"+Okuyucu.toplamSpread;
-  const sonMu = (Okuyucu.spreadIx===Okuyucu.toplamSpread-1);
-  const sonraki = olustur("button");
+  const onceki=olustur("button"); onceki.textContent="‹ Önceki"; onceki.disabled=(Okuyucu.spreadIx===0);
+  const bilgi=olustur("span","sayfabilgi"); bilgi.textContent=(Okuyucu.spreadIx+1)+"/"+Okuyucu.toplamSpread;
+  const sonMu=(Okuyucu.spreadIx===Okuyucu.toplamSpread-1);
+  const sonraki=olustur("button");
   if (sonMu && h.quiz && h.quiz.length){ sonraki.textContent="🧩 Testi çöz"; sonraki.classList.add("test"); }
   else { sonraki.textContent="Sonraki ›"; sonraki.disabled=sonMu; }
-  onceki.addEventListener("click", ()=>spreadGit(-1));
-  sonraki.addEventListener("click", ()=>{ if(sonMu && h.quiz && h.quiz.length) testeGit(); else spreadGit(+1); });
+  onceki.addEventListener("click",()=>spreadGit(-1));
+  sonraki.addEventListener("click",()=>{ if(sonMu && h.quiz && h.quiz.length) testeGit(); else spreadGit(+1); });
   alt.appendChild(onceki); alt.appendChild(bilgi); alt.appendChild(sonraki);
   kap.appendChild(alt);
 
-  const yuzde = Math.round(((Okuyucu.spreadIx+1)/Okuyucu.toplamSpread)*100);
+  const yuzde=Math.round(((Okuyucu.spreadIx+1)/Okuyucu.toplamSpread)*100);
   ilerlemeKaydet({ spread:Okuyucu.spreadIx, yuzde });
   baloncukKapat();
   window.scrollTo(0,0);
 }
 
 function spreadGit(d){
-  const yeni = Okuyucu.spreadIx + d;
+  const yeni=Okuyucu.spreadIx+d;
   if (yeni<0 || yeni>=Okuyucu.toplamSpread) return;
-  Okuyucu.spreadIx = yeni;
-  spreadCiz(d);
+  Okuyucu.spreadIx=yeni; spreadCiz(d);
+}
+
+// görünüm: "cift" | "it" (tek orijinal) | "tr" (tek Türkçe)
+function gorunumAyarla(g){
+  Okuyucu.gorunum = g;
+  ilerlemeKaydet({ gorunum:g });
+  spreadCiz();
 }
 
 // çift-dil cümle etkileşimi: uzun bas → vurgula (iki tarafta), kelime dokun → anlam
@@ -2063,6 +2089,8 @@ function olaylariBagla(){
   $("#okSesBtn").addEventListener("click", sayfaSesliOku);
   $("#tamEkranBtn").addEventListener("click", () => document.body.classList.add("tam-ekran"));
   $("#tamEkranCik").addEventListener("click", () => document.body.classList.remove("tam-ekran"));
+  $("#teKucult").addEventListener("click", () => fontDegis(-2));
+  $("#teBuyut").addEventListener("click", () => fontDegis(+2));
   $("#okFontBuyut").addEventListener("click", () => { fontDegis(+2); });
   $("#okFontKucult").addEventListener("click", () => { fontDegis(-2); });
 
